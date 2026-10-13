@@ -4,11 +4,11 @@
   "rewrites": [
     {
       "source": "/shop",
-      "destination": "/tienda.html"
+      "destination": "/tienda"
     },
     {
       "source": "/cart",
-      "destination": "/carrito.html"
+      "destination": "/carrito"
     }
   ],
   "headers": [
