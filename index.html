@@ -1034,7 +1034,7 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
   }
   function money(n) { return 'AR$ ' + Math.round(n).toLocaleString('es-AR'); }
   function img(src) { return 'https://images.leadconnectorhq.com/image/f_webp/q_80/r_600/u_' + src; }
-  fetch('https://puro-hilo.flujo.com.ar/api/products').then(function (r) { return r.ok ? r.json() : Promise.reject(); }).then(function (d) {
+  fetch('/products.json').then(function (r) { return r.ok ? r.json() : Promise.reject(); }).then(function (d) {
     var list = d.products || [];
     if (!list.length) return;
     var cards = {}, first = grids[0].querySelector('.pc');
@@ -1081,7 +1081,8 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
       brands.forEach(function (b) {
         var id = 'f-marca-' + slug(b);
         if (!document.getElementById(id)) { var s = document.createElement('span'); s.className = 'pf-t'; s.id = id; pf.parentNode.insertBefore(s, pf); }
-        css += 'html:has(#' + id + ':target) .pc:not([data-b="' + b.replace(/"/g, '') + '"]){display:none}html:has(#' + id + ':target) .pf a[href="#' + id + '"]{background:var(--ink);color:var(--cream)}';
+        css += 'html:has(#' + id + ':target) .pc:not([data-b="' + b.replace(/[\\"]/g, '\$&').replace(/[
+]/g, ' ') + '"]){display:none}html:has(#' + id + ':target) .pf a[href="#' + id + '"]{background:var(--ink);color:var(--cream)}';
       });
       var st = document.createElement('style');
       st.textContent = css;
