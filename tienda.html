@@ -951,7 +951,7 @@ html:not(:has(.pf-t:target)) .pf a[href="#f-todos"]{background:var(--ink);color:
       a.setAttribute('data-g', c.g);
       a.setAttribute('data-t', c.t);
       a.setAttribute('data-b', c.b);
-      a.querySelector('.pc-name').textContent = p.n.slice(0, i).replace('Pantalon', 'Pantal&#243;n');
+      a.querySelector('.pc-name').textContent = p.n.slice(0, i).replace('Pantalon', 'Pantal\u00f3n');
       a.querySelector('.pc-code').textContent = p.n.slice(i + 1);
       var pr = a.querySelector('.pc-price');
       if (p.p) {
