@@ -913,7 +913,7 @@ html:not(:has(.pf-t:target)) .pf a[href="#f-todos"]{background:var(--ink);color:
 
 <script>
 (function () {
-  var grid = document.querySelector('.ph-catalog .ph-pgrid');  // the shop; on the home page only the names update
+  var grid = document.querySelector('.ph-catalog .ph-pgrid');  // the shop; on the home page the first 8 products of the shop
   var grids = document.querySelectorAll('.ph-pgrid');
   if (!grids.length || !window.fetch) return;
   var KINDS = [['Camisa', 'camisas'], ['Jean', 'jeans'], ['Pantalon', 'pantalones'], ['Jogger', 'joggers'], ['Short', 'shorts'], ['Blusa', 'blusas'], ['Top', 'blusas']];
@@ -932,20 +932,21 @@ html:not(:has(.pf-t:target)) .pf a[href="#f-todos"]{background:var(--ink);color:
   fetch('https://puro-hilo.flujo.com.ar/products.json').then(function (r) { return r.ok ? r.json() : Promise.reject(); }).then(function (d) {
     var list = d.products || [];
     if (!list.length) return;
+    // the home grid mirrors the first 8 products of the shop (the feed is written in shop order); the shop shows them all
+    var target = grid || grids[0], items = grid ? list : list.slice(0, 8);
     var cards = {}, first = grids[0].querySelector('.pc');
     [].forEach.call(document.querySelectorAll('.ph-pgrid .pc'), function (a) { cards[a.getAttribute('href').split('?')[0].split('/').pop()] = a; });
     var base = first ? first.getAttribute('href').replace(/[^\/]*$/, '') : '/product-details/product/';
     var live = {};
-    list.forEach(function (p) {
+    items.forEach(function (p) {
       live[p.s] = 1;
-      if (!cards[p.s] && !grid) return;
       var c = classify(p.n), a = cards[p.s], i = p.n.lastIndexOf(' ');
-      if (!a && grid) {
+      if (!a) {
         a = document.createElement('a');
         a.className = 'pc';
         a.href = base + p.s;
         a.innerHTML = '<span class="pc-img">' + (p.i ? '<img src="' + esc(img(p.i)) + '" alt="" loading="lazy" width="600" height="750">' : '<span class="pc-none">Foto pr&#243;ximamente</span>') + '</span><span class="pc-name"></span><span class="pc-code"></span>';
-        grid.appendChild(a);
+        target.appendChild(a);
         cards[p.s] = a;
       }
       a.setAttribute('data-g', c.g);
@@ -964,8 +965,8 @@ html:not(:has(.pf-t:target)) .pf a[href="#f-todos"]{background:var(--ink);color:
         if (p.i && decodeURIComponent(im.src).indexOf(p.i) < 0) im.src = img(p.i);
       }
     });
-    if (!grid) return;
     Object.keys(cards).forEach(function (s) { if (!live[s]) cards[s].remove(); });
+    if (!grid) { items.forEach(function (p) { target.appendChild(cards[p.s]); }); return; }
     // brand chips, their anchors and filter rules, rebuilt from the live names
     var all = [].slice.call(grid.querySelectorAll('.pc')), counts = {};
     all.forEach(function (a) { var b = a.getAttribute('data-b'); if (b) counts[b] = (counts[b] || 0) + 1; });
