@@ -976,8 +976,7 @@ html:not(:has(.pf-t:target)) .pf a[href="#f-todos"]{background:var(--ink);color:
       brands.forEach(function (b) {
         var id = 'f-marca-' + slug(b);
         if (!document.getElementById(id)) { var s = document.createElement('span'); s.className = 'pf-t'; s.id = id; pf.parentNode.insertBefore(s, pf); }
-        css += 'html:has(#' + id + ':target) .pc:not([data-b="' + b.replace(/[\\"]/g, '\$&').replace(/[
-]/g, ' ') + '"]){display:none}html:has(#' + id + ':target) .pf a[href="#' + id + '"]{background:var(--ink);color:var(--cream)}';
+        css += 'html:has(#' + id + ':target) .pc:not([data-b="' + b.replace(/[\\"]/g, '\\$&').replace(/[\r\n\f]/g, ' ') + '"]){display:none}html:has(#' + id + ':target) .pf a[href="#' + id + '"]{background:var(--ink);color:var(--cream)}';
       });
       var st = document.createElement('style');
       st.textContent = css;
