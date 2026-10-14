@@ -1034,7 +1034,7 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
   }
   function money(n) { return 'AR$ ' + Math.round(n).toLocaleString('es-AR'); }
   function img(src) { return 'https://images.leadconnectorhq.com/image/f_webp/q_80/r_600/u_' + src; }
-  fetch('/products.json').then(function (r) { return r.ok ? r.json() : Promise.reject(); }).then(function (d) {
+  fetch('https://puro-hilo.flujo.com.ar/products.json').then(function (r) { return r.ok ? r.json() : Promise.reject(); }).then(function (d) {
     var list = d.products || [];
     if (!list.length) return;
     var cards = {}, first = grids[0].querySelector('.pc');

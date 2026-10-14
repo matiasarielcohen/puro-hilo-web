@@ -929,7 +929,7 @@ html:not(:has(.pf-t:target)) .pf a[href="#f-todos"]{background:var(--ink);color:
   }
   function money(n) { return 'AR$ ' + Math.round(n).toLocaleString('es-AR'); }
   function img(src) { return 'https://images.leadconnectorhq.com/image/f_webp/q_80/r_600/u_' + src; }
-  fetch('/products.json').then(function (r) { return r.ok ? r.json() : Promise.reject(); }).then(function (d) {
+  fetch('https://puro-hilo.flujo.com.ar/products.json').then(function (r) { return r.ok ? r.json() : Promise.reject(); }).then(function (d) {
     var list = d.products || [];
     if (!list.length) return;
     var cards = {}, first = grids[0].querySelector('.pc');
