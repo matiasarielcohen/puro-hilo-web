@@ -109,13 +109,6 @@ color:var(--cream)!important;font-size:13px;font-weight:500;letter-spacing:.16em
 .ph-banner p.ph-sub{margin:12px auto 0;max-width:520px;color:var(--muted)}
 .ph-help{background:var(--cream);text-align:center;padding:28px 24px 36px;font-size:15px;color:var(--muted)}
 .ph-help a{color:var(--ink);border-bottom:1px solid var(--gold-line);font-weight:500}
-.ph-about{display:grid;grid-template-columns:1.05fr 1fr;gap:72px;align-items:center}
-.ph-about-copy h1{margin:10px 0 24px;font-size:clamp(40px,4.6vw,64px)}
-.ph-about-copy p:not(.ph-eyebrow){color:var(--muted);font-size:17px}
-.ph-about-copy p+p{margin-top:16px}
-.ph-about-img{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.ph-about-img img{width:100%;aspect-ratio:3/4;object-fit:cover}
-.ph-about-img img:last-child{margin-top:48px}
 .ph-values{background:var(--sand)}
 .ph-values ul{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
 .ph-values li{background:var(--cream);padding:36px 30px}
@@ -150,7 +143,10 @@ color:var(--cream)!important;font-size:13px;font-weight:500;letter-spacing:.16em
 .pc-name{display:block;margin-top:12px;font-family:var(--serif);font-size:22px;font-weight:600;line-height:1.15}
 .pc-code{display:block;margin-top:3px;font-size:12px;letter-spacing:.14em;color:var(--muted)}
 .pc-price{display:block;margin-top:6px;font-size:15px;font-weight:500}
-.pf{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 40px}
+.pf{margin:0 0 40px}
+.pf-row{display:flex;flex-wrap:wrap;gap:8px}
+.pf-brands{margin-top:12px;align-items:center}
+.pf-label{font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;opacity:.6;margin-right:4px}
 .pf a{display:inline-flex;align-items:center;gap:7px;min-height:42px;padding:0 14px;border:1px solid var(--ink);font-size:12px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;transition:background .2s,color .2s}
 .pf a:hover{background:var(--sand)}
 .pf small{font-size:11px;letter-spacing:.04em;opacity:.65}
@@ -188,10 +184,10 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
 @keyframes ph-rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @keyframes ph-settle{from{transform:scale(1.05)}to{transform:scale(1)}}
 @keyframes ph-ring{0%{box-shadow:0 6px 20px rgba(20,18,19,.28),0 0 0 0 rgba(198,178,152,.6)}70%,100%{box-shadow:0 6px 20px rgba(20,18,19,.28),0 0 0 16px rgba(198,178,152,0)}}
-:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap,.ph-about-copy)>*{animation:ph-rise .9s cubic-bezier(.16,1,.3,1) both}
-:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap,.ph-about-copy)>:nth-child(2){animation-delay:.1s}
-:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap,.ph-about-copy)>:nth-child(3){animation-delay:.2s}
-:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap,.ph-about-copy)>:nth-child(n+4){animation-delay:.3s}
+:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap)>*{animation:ph-rise .9s cubic-bezier(.16,1,.3,1) both}
+:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap)>:nth-child(2){animation-delay:.1s}
+:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap)>:nth-child(3){animation-delay:.2s}
+:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap)>:nth-child(n+4){animation-delay:.3s}
 .ph-hero-img{animation:ph-settle 2s cubic-bezier(.16,1,.3,1) both}
 .ph-wa{animation:ph-ring 2.4s ease-out 3s 3}
 .ph .ph-rv{opacity:0;transform:translateY(18px);transition:opacity .8s cubic-bezier(.16,1,.3,1) var(--d,0s),transform .9s cubic-bezier(.16,1,.3,1) var(--d,0s)}
@@ -214,7 +210,6 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
 .ph-tile-label h3{font-size:28px}
 .ph-tile-label span{display:none}
 .ph-steps ol{grid-template-columns:1fr;gap:36px}
-.ph-about{grid-template-columns:1fr;gap:40px}
 .ph-values ul{grid-template-columns:1fr}
 .ph-footer-grid{grid-template-columns:1fr 1fr;gap:40px 24px}
 .ph-footer-grid>div:first-child,.ph-footer-grid>div:last-child{grid-column:1/-1}}
@@ -226,7 +221,8 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
 .ph-cards{grid-template-columns:1fr}
 .ph-pgrid{grid-template-columns:repeat(2,1fr);gap:28px 12px}
 .pc-name{font-size:19px}
-.pf{gap:6px;margin-bottom:28px}
+.pf{margin-bottom:28px}
+.pf-row{gap:6px}
 .pf a{min-height:36px;padding:0 11px;font-size:11px}
 .ph-featured-head .ph-wrap{flex-direction:column;align-items:flex-start;gap:14px}
 .ph-logo img{height:68px}
@@ -234,6 +230,7 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
 .ph-actions .ph-btn{flex:1 1 100%}
 }
 @media(prefers-reduced-motion:reduce){.ph *{transition:none!important;animation:none!important}.ph .ph-rv{opacity:1;transform:none}}
+.ec-review-stars,.review-component,.ec-review-heading,.ec-ratings-distribution{display:none!important}
 </style>
 <div class="ph">
   <div class="ph-bleed ph-announce">
@@ -255,7 +252,6 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
         <a href="/shop">Tienda</a>
         <a href="/shop#f-mujer">Mujer</a>
         <a href="/shop#f-hombre">Hombre</a>
-        <a href="/nosotros">Nosotros</a>
         <a href="/contacto">Contacto</a>
         <a class="ph-cart" href="/cart">Carrito</a>
       </nav>
@@ -366,13 +362,6 @@ color:var(--cream)!important;font-size:13px;font-weight:500;letter-spacing:.16em
 .ph-banner p.ph-sub{margin:12px auto 0;max-width:520px;color:var(--muted)}
 .ph-help{background:var(--cream);text-align:center;padding:28px 24px 36px;font-size:15px;color:var(--muted)}
 .ph-help a{color:var(--ink);border-bottom:1px solid var(--gold-line);font-weight:500}
-.ph-about{display:grid;grid-template-columns:1.05fr 1fr;gap:72px;align-items:center}
-.ph-about-copy h1{margin:10px 0 24px;font-size:clamp(40px,4.6vw,64px)}
-.ph-about-copy p:not(.ph-eyebrow){color:var(--muted);font-size:17px}
-.ph-about-copy p+p{margin-top:16px}
-.ph-about-img{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.ph-about-img img{width:100%;aspect-ratio:3/4;object-fit:cover}
-.ph-about-img img:last-child{margin-top:48px}
 .ph-values{background:var(--sand)}
 .ph-values ul{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
 .ph-values li{background:var(--cream);padding:36px 30px}
@@ -407,7 +396,10 @@ color:var(--cream)!important;font-size:13px;font-weight:500;letter-spacing:.16em
 .pc-name{display:block;margin-top:12px;font-family:var(--serif);font-size:22px;font-weight:600;line-height:1.15}
 .pc-code{display:block;margin-top:3px;font-size:12px;letter-spacing:.14em;color:var(--muted)}
 .pc-price{display:block;margin-top:6px;font-size:15px;font-weight:500}
-.pf{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 40px}
+.pf{margin:0 0 40px}
+.pf-row{display:flex;flex-wrap:wrap;gap:8px}
+.pf-brands{margin-top:12px;align-items:center}
+.pf-label{font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;opacity:.6;margin-right:4px}
 .pf a{display:inline-flex;align-items:center;gap:7px;min-height:42px;padding:0 14px;border:1px solid var(--ink);font-size:12px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;transition:background .2s,color .2s}
 .pf a:hover{background:var(--sand)}
 .pf small{font-size:11px;letter-spacing:.04em;opacity:.65}
@@ -445,10 +437,10 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
 @keyframes ph-rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @keyframes ph-settle{from{transform:scale(1.05)}to{transform:scale(1)}}
 @keyframes ph-ring{0%{box-shadow:0 6px 20px rgba(20,18,19,.28),0 0 0 0 rgba(198,178,152,.6)}70%,100%{box-shadow:0 6px 20px rgba(20,18,19,.28),0 0 0 16px rgba(198,178,152,0)}}
-:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap,.ph-about-copy)>*{animation:ph-rise .9s cubic-bezier(.16,1,.3,1) both}
-:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap,.ph-about-copy)>:nth-child(2){animation-delay:.1s}
-:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap,.ph-about-copy)>:nth-child(3){animation-delay:.2s}
-:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap,.ph-about-copy)>:nth-child(n+4){animation-delay:.3s}
+:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap)>*{animation:ph-rise .9s cubic-bezier(.16,1,.3,1) both}
+:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap)>:nth-child(2){animation-delay:.1s}
+:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap)>:nth-child(3){animation-delay:.2s}
+:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap)>:nth-child(n+4){animation-delay:.3s}
 .ph-hero-img{animation:ph-settle 2s cubic-bezier(.16,1,.3,1) both}
 .ph-wa{animation:ph-ring 2.4s ease-out 3s 3}
 .ph .ph-rv{opacity:0;transform:translateY(18px);transition:opacity .8s cubic-bezier(.16,1,.3,1) var(--d,0s),transform .9s cubic-bezier(.16,1,.3,1) var(--d,0s)}
@@ -471,7 +463,6 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
 .ph-tile-label h3{font-size:28px}
 .ph-tile-label span{display:none}
 .ph-steps ol{grid-template-columns:1fr;gap:36px}
-.ph-about{grid-template-columns:1fr;gap:40px}
 .ph-values ul{grid-template-columns:1fr}
 .ph-footer-grid{grid-template-columns:1fr 1fr;gap:40px 24px}
 .ph-footer-grid>div:first-child,.ph-footer-grid>div:last-child{grid-column:1/-1}}
@@ -483,7 +474,8 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
 .ph-cards{grid-template-columns:1fr}
 .ph-pgrid{grid-template-columns:repeat(2,1fr);gap:28px 12px}
 .pc-name{font-size:19px}
-.pf{gap:6px;margin-bottom:28px}
+.pf{margin-bottom:28px}
+.pf-row{gap:6px}
 .pf a{min-height:36px;padding:0 11px;font-size:11px}
 .ph-featured-head .ph-wrap{flex-direction:column;align-items:flex-start;gap:14px}
 .ph-logo img{height:68px}
@@ -491,6 +483,7 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
 .ph-actions .ph-btn{flex:1 1 100%}
 }
 @media(prefers-reduced-motion:reduce){.ph *{transition:none!important;animation:none!important}.ph .ph-rv{opacity:1;transform:none}}
+.ec-review-stars,.review-component,.ec-review-heading,.ec-ratings-distribution{display:none!important}
 </style>
 <div class="ph">
   <section class="ph-bleed ph-hero">
@@ -620,13 +613,6 @@ color:var(--cream)!important;font-size:13px;font-weight:500;letter-spacing:.16em
 .ph-banner p.ph-sub{margin:12px auto 0;max-width:520px;color:var(--muted)}
 .ph-help{background:var(--cream);text-align:center;padding:28px 24px 36px;font-size:15px;color:var(--muted)}
 .ph-help a{color:var(--ink);border-bottom:1px solid var(--gold-line);font-weight:500}
-.ph-about{display:grid;grid-template-columns:1.05fr 1fr;gap:72px;align-items:center}
-.ph-about-copy h1{margin:10px 0 24px;font-size:clamp(40px,4.6vw,64px)}
-.ph-about-copy p:not(.ph-eyebrow){color:var(--muted);font-size:17px}
-.ph-about-copy p+p{margin-top:16px}
-.ph-about-img{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.ph-about-img img{width:100%;aspect-ratio:3/4;object-fit:cover}
-.ph-about-img img:last-child{margin-top:48px}
 .ph-values{background:var(--sand)}
 .ph-values ul{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
 .ph-values li{background:var(--cream);padding:36px 30px}
@@ -661,7 +647,10 @@ color:var(--cream)!important;font-size:13px;font-weight:500;letter-spacing:.16em
 .pc-name{display:block;margin-top:12px;font-family:var(--serif);font-size:22px;font-weight:600;line-height:1.15}
 .pc-code{display:block;margin-top:3px;font-size:12px;letter-spacing:.14em;color:var(--muted)}
 .pc-price{display:block;margin-top:6px;font-size:15px;font-weight:500}
-.pf{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 40px}
+.pf{margin:0 0 40px}
+.pf-row{display:flex;flex-wrap:wrap;gap:8px}
+.pf-brands{margin-top:12px;align-items:center}
+.pf-label{font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;opacity:.6;margin-right:4px}
 .pf a{display:inline-flex;align-items:center;gap:7px;min-height:42px;padding:0 14px;border:1px solid var(--ink);font-size:12px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;transition:background .2s,color .2s}
 .pf a:hover{background:var(--sand)}
 .pf small{font-size:11px;letter-spacing:.04em;opacity:.65}
@@ -699,10 +688,10 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
 @keyframes ph-rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @keyframes ph-settle{from{transform:scale(1.05)}to{transform:scale(1)}}
 @keyframes ph-ring{0%{box-shadow:0 6px 20px rgba(20,18,19,.28),0 0 0 0 rgba(198,178,152,.6)}70%,100%{box-shadow:0 6px 20px rgba(20,18,19,.28),0 0 0 16px rgba(198,178,152,0)}}
-:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap,.ph-about-copy)>*{animation:ph-rise .9s cubic-bezier(.16,1,.3,1) both}
-:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap,.ph-about-copy)>:nth-child(2){animation-delay:.1s}
-:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap,.ph-about-copy)>:nth-child(3){animation-delay:.2s}
-:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap,.ph-about-copy)>:nth-child(n+4){animation-delay:.3s}
+:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap)>*{animation:ph-rise .9s cubic-bezier(.16,1,.3,1) both}
+:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap)>:nth-child(2){animation-delay:.1s}
+:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap)>:nth-child(3){animation-delay:.2s}
+:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap)>:nth-child(n+4){animation-delay:.3s}
 .ph-hero-img{animation:ph-settle 2s cubic-bezier(.16,1,.3,1) both}
 .ph-wa{animation:ph-ring 2.4s ease-out 3s 3}
 .ph .ph-rv{opacity:0;transform:translateY(18px);transition:opacity .8s cubic-bezier(.16,1,.3,1) var(--d,0s),transform .9s cubic-bezier(.16,1,.3,1) var(--d,0s)}
@@ -725,7 +714,6 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
 .ph-tile-label h3{font-size:28px}
 .ph-tile-label span{display:none}
 .ph-steps ol{grid-template-columns:1fr;gap:36px}
-.ph-about{grid-template-columns:1fr;gap:40px}
 .ph-values ul{grid-template-columns:1fr}
 .ph-footer-grid{grid-template-columns:1fr 1fr;gap:40px 24px}
 .ph-footer-grid>div:first-child,.ph-footer-grid>div:last-child{grid-column:1/-1}}
@@ -737,7 +725,8 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
 .ph-cards{grid-template-columns:1fr}
 .ph-pgrid{grid-template-columns:repeat(2,1fr);gap:28px 12px}
 .pc-name{font-size:19px}
-.pf{gap:6px;margin-bottom:28px}
+.pf{margin-bottom:28px}
+.pf-row{gap:6px}
 .pf a{min-height:36px;padding:0 11px;font-size:11px}
 .ph-featured-head .ph-wrap{flex-direction:column;align-items:flex-start;gap:14px}
 .ph-logo img{height:68px}
@@ -745,6 +734,7 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
 .ph-actions .ph-btn{flex:1 1 100%}
 }
 @media(prefers-reduced-motion:reduce){.ph *{transition:none!important;animation:none!important}.ph .ph-rv{opacity:1;transform:none}}
+.ec-review-stars,.review-component,.ec-review-heading,.ec-ratings-distribution{display:none!important}
 </style>
 <div class="ph">
   <section class="ph-bleed ph-section">
@@ -876,13 +866,6 @@ color:var(--cream)!important;font-size:13px;font-weight:500;letter-spacing:.16em
 .ph-banner p.ph-sub{margin:12px auto 0;max-width:520px;color:var(--muted)}
 .ph-help{background:var(--cream);text-align:center;padding:28px 24px 36px;font-size:15px;color:var(--muted)}
 .ph-help a{color:var(--ink);border-bottom:1px solid var(--gold-line);font-weight:500}
-.ph-about{display:grid;grid-template-columns:1.05fr 1fr;gap:72px;align-items:center}
-.ph-about-copy h1{margin:10px 0 24px;font-size:clamp(40px,4.6vw,64px)}
-.ph-about-copy p:not(.ph-eyebrow){color:var(--muted);font-size:17px}
-.ph-about-copy p+p{margin-top:16px}
-.ph-about-img{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.ph-about-img img{width:100%;aspect-ratio:3/4;object-fit:cover}
-.ph-about-img img:last-child{margin-top:48px}
 .ph-values{background:var(--sand)}
 .ph-values ul{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
 .ph-values li{background:var(--cream);padding:36px 30px}
@@ -917,7 +900,10 @@ color:var(--cream)!important;font-size:13px;font-weight:500;letter-spacing:.16em
 .pc-name{display:block;margin-top:12px;font-family:var(--serif);font-size:22px;font-weight:600;line-height:1.15}
 .pc-code{display:block;margin-top:3px;font-size:12px;letter-spacing:.14em;color:var(--muted)}
 .pc-price{display:block;margin-top:6px;font-size:15px;font-weight:500}
-.pf{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 40px}
+.pf{margin:0 0 40px}
+.pf-row{display:flex;flex-wrap:wrap;gap:8px}
+.pf-brands{margin-top:12px;align-items:center}
+.pf-label{font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;opacity:.6;margin-right:4px}
 .pf a{display:inline-flex;align-items:center;gap:7px;min-height:42px;padding:0 14px;border:1px solid var(--ink);font-size:12px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;transition:background .2s,color .2s}
 .pf a:hover{background:var(--sand)}
 .pf small{font-size:11px;letter-spacing:.04em;opacity:.65}
@@ -955,10 +941,10 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
 @keyframes ph-rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @keyframes ph-settle{from{transform:scale(1.05)}to{transform:scale(1)}}
 @keyframes ph-ring{0%{box-shadow:0 6px 20px rgba(20,18,19,.28),0 0 0 0 rgba(198,178,152,.6)}70%,100%{box-shadow:0 6px 20px rgba(20,18,19,.28),0 0 0 16px rgba(198,178,152,0)}}
-:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap,.ph-about-copy)>*{animation:ph-rise .9s cubic-bezier(.16,1,.3,1) both}
-:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap,.ph-about-copy)>:nth-child(2){animation-delay:.1s}
-:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap,.ph-about-copy)>:nth-child(3){animation-delay:.2s}
-:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap,.ph-about-copy)>:nth-child(n+4){animation-delay:.3s}
+:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap)>*{animation:ph-rise .9s cubic-bezier(.16,1,.3,1) both}
+:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap)>:nth-child(2){animation-delay:.1s}
+:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap)>:nth-child(3){animation-delay:.2s}
+:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap)>:nth-child(n+4){animation-delay:.3s}
 .ph-hero-img{animation:ph-settle 2s cubic-bezier(.16,1,.3,1) both}
 .ph-wa{animation:ph-ring 2.4s ease-out 3s 3}
 .ph .ph-rv{opacity:0;transform:translateY(18px);transition:opacity .8s cubic-bezier(.16,1,.3,1) var(--d,0s),transform .9s cubic-bezier(.16,1,.3,1) var(--d,0s)}
@@ -981,7 +967,6 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
 .ph-tile-label h3{font-size:28px}
 .ph-tile-label span{display:none}
 .ph-steps ol{grid-template-columns:1fr;gap:36px}
-.ph-about{grid-template-columns:1fr;gap:40px}
 .ph-values ul{grid-template-columns:1fr}
 .ph-footer-grid{grid-template-columns:1fr 1fr;gap:40px 24px}
 .ph-footer-grid>div:first-child,.ph-footer-grid>div:last-child{grid-column:1/-1}}
@@ -993,7 +978,8 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
 .ph-cards{grid-template-columns:1fr}
 .ph-pgrid{grid-template-columns:repeat(2,1fr);gap:28px 12px}
 .pc-name{font-size:19px}
-.pf{gap:6px;margin-bottom:28px}
+.pf{margin-bottom:28px}
+.pf-row{gap:6px}
 .pf a{min-height:36px;padding:0 11px;font-size:11px}
 .ph-featured-head .ph-wrap{flex-direction:column;align-items:flex-start;gap:14px}
 .ph-logo img{height:68px}
@@ -1001,6 +987,7 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
 .ph-actions .ph-btn{flex:1 1 100%}
 }
 @media(prefers-reduced-motion:reduce){.ph *{transition:none!important;animation:none!important}.ph .ph-rv{opacity:1;transform:none}}
+.ec-review-stars,.review-component,.ec-review-heading,.ec-ratings-distribution{display:none!important}
 </style>
 <div class="ph">
   <section class="ph-bleed ph-featured-head">
@@ -1015,19 +1002,105 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
   <section class="ph-bleed ph-featured-grid">
     <div class="ph-wrap">
       <div class="ph-pgrid">
-<a class="pc" href="https://sites.leadconnectorhq.com/preview/vrgzP8SDinXJLaUARWet/product/lin-1018ms" data-g="hombre" data-t="camisas"><span class="pc-img"><img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_600/u_https://assets.cdn.filesafe.space/MvmUL33EtUoUyH184hmv/media/3fd1a9c2-bf46-4e09-9311-525a2b9a1458.jpg" alt="Camisa de Hombre LIN-1018MS" loading="lazy" width="600" height="750" style="--c:0.059"></span><span class="pc-name">Camisa de Hombre</span><span class="pc-code">LIN-1018MS</span></a>
-<a class="pc" href="https://sites.leadconnectorhq.com/preview/vrgzP8SDinXJLaUARWet/product/azh-1487msl" data-g="hombre" data-t="jeans"><span class="pc-img"><img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_600/u_https://assets.cdn.filesafe.space/MvmUL33EtUoUyH184hmv/media/4090e8de-2a15-4929-876d-c9e7a46c4837.jpg" alt="Jean de Hombre AZH-1487MSL" loading="lazy" width="600" height="750" style="--c:0.067"></span><span class="pc-name">Jean de Hombre</span><span class="pc-code">AZH-1487MSL</span></a>
-<a class="pc" href="https://sites.leadconnectorhq.com/preview/vrgzP8SDinXJLaUARWet/product/ety-4249m" data-g="hombre" data-t="pantalones"><span class="pc-img"><img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_600/u_https://assets.cdn.filesafe.space/MvmUL33EtUoUyH184hmv/media/30f8e576-00dd-431f-905e-3b2a02b3f7c8.jpg" alt="Pantalon de Hombre ETY-4249M" loading="lazy" width="600" height="750" style="--c:0.057"></span><span class="pc-name">Pantal&#243;n de Hombre</span><span class="pc-code">ETY-4249M</span></a>
-<a class="pc" href="https://sites.leadconnectorhq.com/preview/vrgzP8SDinXJLaUARWet/product/gcp-8073st" data-g="mujer" data-t="jeans"><span class="pc-img"><img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_600/u_https://assets.cdn.filesafe.space/MvmUL33EtUoUyH184hmv/media/eac87e72-7ebe-4117-8dab-7b4033ec2252.jpg" alt="Jean de Mujer GCP-8073ST" loading="lazy" width="600" height="750" style="--c:0.065"></span><span class="pc-name">Jean de Mujer</span><span class="pc-code">GCP-8073ST</span></a>
-<a class="pc" href="https://sites.leadconnectorhq.com/preview/vrgzP8SDinXJLaUARWet/product/njz-2283" data-g="mujer" data-t="pantalones"><span class="pc-img"><img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_600/u_https://assets.cdn.filesafe.space/MvmUL33EtUoUyH184hmv/media/888a7829-bdfa-4cdd-b8a8-b5ff43690247.jpg" alt="Pantalon de Mujer NJZ-2283" loading="lazy" width="600" height="750" style="--c:0.072"></span><span class="pc-name">Pantal&#243;n de Mujer</span><span class="pc-code">NJZ-2283</span></a>
-<a class="pc" href="https://sites.leadconnectorhq.com/preview/vrgzP8SDinXJLaUARWet/product/cam-0174ms" data-g="hombre" data-t="joggers"><span class="pc-img"><img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_600/u_https://assets.cdn.filesafe.space/MvmUL33EtUoUyH184hmv/media/f4b327b7-3099-49ce-a7fe-620c2cab33e6.jpg" alt="Jogger de Hombre CAM-0174MS" loading="lazy" width="600" height="750" style="--c:0.057"></span><span class="pc-name">Jogger de Hombre</span><span class="pc-code">CAM-0174MS</span></a>
-<a class="pc" href="https://sites.leadconnectorhq.com/preview/vrgzP8SDinXJLaUARWet/product/njz-2314" data-g="mujer" data-t="shorts"><span class="pc-img"><img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_600/u_https://assets.cdn.filesafe.space/MvmUL33EtUoUyH184hmv/media/478174aa-b982-4200-afc6-279fcb9b3b8c.jpg" alt="Short de Mujer NJZ-2314" loading="lazy" width="600" height="750" style="--c:0.072"></span><span class="pc-name">Short de Mujer</span><span class="pc-code">NJZ-2314</span></a>
-<a class="pc" href="https://sites.leadconnectorhq.com/preview/vrgzP8SDinXJLaUARWet/product/azh-1493msl" data-g="hombre" data-t="jeans"><span class="pc-img"><img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_600/u_https://assets.cdn.filesafe.space/MvmUL33EtUoUyH184hmv/media/63e98d31-5f7e-4ffe-98d2-aa5e7f1cac38.jpg" alt="Jean de Hombre AZH-1493MSL" loading="lazy" width="600" height="750" style="--c:0.057"></span><span class="pc-name">Jean de Hombre</span><span class="pc-code">AZH-1493MSL</span></a>
+<a class="pc" href="https://sites.leadconnectorhq.com/preview/vrgzP8SDinXJLaUARWet/product/lin-1018ms" data-g="hombre" data-t="camisas" data-b="Redox"><span class="pc-img"><img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_600/u_https://assets.cdn.filesafe.space/MvmUL33EtUoUyH184hmv/media/3fd1a9c2-bf46-4e09-9311-525a2b9a1458.jpg" alt="Redox Camisa de Hombre Rayas Grises Manga Corta LIN-1018MS" loading="lazy" width="600" height="750" style="--c:0.059"></span><span class="pc-name">Redox Camisa de Hombre Rayas Grises Manga Corta</span><span class="pc-code">LIN-1018MS</span></a>
+<a class="pc" href="https://sites.leadconnectorhq.com/preview/vrgzP8SDinXJLaUARWet/product/azh-1487msl" data-g="hombre" data-t="jeans" data-b="Redox"><span class="pc-img"><img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_600/u_https://assets.cdn.filesafe.space/MvmUL33EtUoUyH184hmv/media/4090e8de-2a15-4929-876d-c9e7a46c4837.jpg" alt="Redox Jean de Hombre Azul Clasico AZH-1487MSL" loading="lazy" width="600" height="750" style="--c:0.067"></span><span class="pc-name">Redox Jean de Hombre Azul Clasico</span><span class="pc-code">AZH-1487MSL</span></a>
+<a class="pc" href="https://sites.leadconnectorhq.com/preview/vrgzP8SDinXJLaUARWet/product/ety-4249m" data-g="hombre" data-t="pantalones" data-b="Redox"><span class="pc-img"><img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_600/u_https://assets.cdn.filesafe.space/MvmUL33EtUoUyH184hmv/media/30f8e576-00dd-431f-905e-3b2a02b3f7c8.jpg" alt="Redox Pantalon de Hombre Chino Camel ETY-4249M" loading="lazy" width="600" height="750" style="--c:0.057"></span><span class="pc-name">Redox Pantal&#243;n de Hombre Chino Camel</span><span class="pc-code">ETY-4249M</span></a>
+<a class="pc" href="https://sites.leadconnectorhq.com/preview/vrgzP8SDinXJLaUARWet/product/gcp-8073st" data-g="mujer" data-t="jeans" data-b="Salvaje"><span class="pc-img"><img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_600/u_https://assets.cdn.filesafe.space/MvmUL33EtUoUyH184hmv/media/eac87e72-7ebe-4117-8dab-7b4033ec2252.jpg" alt="Salvaje Jean de Mujer Recto Azul Medio GCP-8073ST" loading="lazy" width="600" height="750" style="--c:0.065"></span><span class="pc-name">Salvaje Jean de Mujer Recto Azul Medio</span><span class="pc-code">GCP-8073ST</span></a>
+<a class="pc" href="https://sites.leadconnectorhq.com/preview/vrgzP8SDinXJLaUARWet/product/njz-2283" data-g="mujer" data-t="pantalones" data-b="Salvaje"><span class="pc-img"><img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_600/u_https://assets.cdn.filesafe.space/MvmUL33EtUoUyH184hmv/media/888a7829-bdfa-4cdd-b8a8-b5ff43690247.jpg" alt="Salvaje Pantalon de Mujer Crema Ancho NJZ-2283" loading="lazy" width="600" height="750" style="--c:0.072"></span><span class="pc-name">Salvaje Pantal&#243;n de Mujer Crema Ancho</span><span class="pc-code">NJZ-2283</span></a>
+<a class="pc" href="https://sites.leadconnectorhq.com/preview/vrgzP8SDinXJLaUARWet/product/cam-0174ms" data-g="hombre" data-t="joggers" data-b="Redox"><span class="pc-img"><img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_600/u_https://assets.cdn.filesafe.space/MvmUL33EtUoUyH184hmv/media/f4b327b7-3099-49ce-a7fe-620c2cab33e6.jpg" alt="Redox Jogger de Hombre Cargo Verde Militar CAM-0174MS" loading="lazy" width="600" height="750" style="--c:0.057"></span><span class="pc-name">Redox Jogger de Hombre Cargo Verde Militar</span><span class="pc-code">CAM-0174MS</span></a>
+<a class="pc" href="https://sites.leadconnectorhq.com/preview/vrgzP8SDinXJLaUARWet/product/njz-2314" data-g="mujer" data-t="shorts" data-b="Salvaje"><span class="pc-img"><img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_600/u_https://assets.cdn.filesafe.space/MvmUL33EtUoUyH184hmv/media/478174aa-b982-4200-afc6-279fcb9b3b8c.jpg" alt="Salvaje Short de Mujer Blanco Cinturon NJZ-2314" loading="lazy" width="600" height="750" style="--c:0.072"></span><span class="pc-name">Salvaje Short de Mujer Blanco Cinturon</span><span class="pc-code">NJZ-2314</span></a>
+<a class="pc" href="https://sites.leadconnectorhq.com/preview/vrgzP8SDinXJLaUARWet/product/azh-1493msl" data-g="hombre" data-t="jeans" data-b="Redox"><span class="pc-img"><img src="https://images.leadconnectorhq.com/image/f_webp/q_80/r_600/u_https://assets.cdn.filesafe.space/MvmUL33EtUoUyH184hmv/media/63e98d31-5f7e-4ffe-98d2-aa5e7f1cac38.jpg" alt="Redox Jean de Hombre Celeste Claro AZH-1493MSL" loading="lazy" width="600" height="750" style="--c:0.057"></span><span class="pc-name">Redox Jean de Hombre Celeste Claro</span><span class="pc-code">AZH-1493MSL</span></a>
       </div>
       <div class="ph-actions"><a class="ph-btn" href="/shop">Ver toda la tienda</a></div>
     </div>
   </section>
 </div>
+
+<script>
+(function () {
+  var grid = document.querySelector('.ph-catalog .ph-pgrid');  // the shop; on the home page only the names update
+  var grids = document.querySelectorAll('.ph-pgrid');
+  if (!grids.length || !window.fetch) return;
+  var KINDS = [['Camisa', 'camisas'], ['Jean', 'jeans'], ['Pantalon', 'pantalones'], ['Jogger', 'joggers'], ['Short', 'shorts'], ['Blusa', 'blusas'], ['Top', 'blusas']];
+  var BRAND = /^(.*?)\s*\b(Camisa|Jean|Pantalon|Jogger|Short|Blusa|Top)\b/;
+  function slug(s) { return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, ''); }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]; }); }
+  function classify(name) {
+    var g = / de Mujer/.test(name) ? 'mujer' : / de Hombre/.test(name) ? 'hombre' : '';
+    var t = '';
+    KINDS.some(function (k) { if (new RegExp('\\b' + k[0] + '\\b').test(name)) { t = k[1]; return true; } });
+    var m = BRAND.exec(name);
+    return { g: g, t: t, b: m ? m[1].trim() : '' };
+  }
+  function money(n) { return 'AR$ ' + Math.round(n).toLocaleString('es-AR'); }
+  function img(src) { return 'https://images.leadconnectorhq.com/image/f_webp/q_80/r_600/u_' + src; }
+  fetch('https://puro-hilo.flujo.com.ar/api/products').then(function (r) { return r.ok ? r.json() : Promise.reject(); }).then(function (d) {
+    var list = d.products || [];
+    if (!list.length) return;
+    var cards = {}, first = grids[0].querySelector('.pc');
+    [].forEach.call(document.querySelectorAll('.ph-pgrid .pc'), function (a) { cards[a.getAttribute('href').split('?')[0].split('/').pop()] = a; });
+    var base = first ? first.getAttribute('href').replace(/[^\/]*$/, '') : '/product-details/product/';
+    var live = {};
+    list.forEach(function (p) {
+      live[p.s] = 1;
+      if (!cards[p.s] && !grid) return;
+      var c = classify(p.n), a = cards[p.s], i = p.n.lastIndexOf(' ');
+      if (!a && grid) {
+        a = document.createElement('a');
+        a.className = 'pc';
+        a.href = base + p.s;
+        a.innerHTML = '<span class="pc-img">' + (p.i ? '<img src="' + esc(img(p.i)) + '" alt="" loading="lazy" width="600" height="750">' : '<span class="pc-none">Foto pr&#243;ximamente</span>') + '</span><span class="pc-name"></span><span class="pc-code"></span>';
+        grid.appendChild(a);
+        cards[p.s] = a;
+      }
+      a.setAttribute('data-g', c.g);
+      a.setAttribute('data-t', c.t);
+      a.setAttribute('data-b', c.b);
+      a.querySelector('.pc-name').textContent = p.n.slice(0, i).replace('Pantalon', 'Pantal&#243;n');
+      a.querySelector('.pc-code').textContent = p.n.slice(i + 1);
+      var pr = a.querySelector('.pc-price');
+      if (p.p) {
+        if (!pr) { pr = document.createElement('span'); pr.className = 'pc-price'; a.appendChild(pr); }
+        pr.textContent = 'Desde ' + money(p.p);
+      } else if (pr) pr.remove();
+      var im = a.querySelector('img');
+      if (im) {
+        im.alt = p.n;
+        if (p.i && decodeURIComponent(im.src).indexOf(p.i) < 0) im.src = img(p.i);
+      }
+    });
+    if (!grid) return;
+    Object.keys(cards).forEach(function (s) { if (!live[s]) cards[s].remove(); });
+    // brand chips, their anchors and filter rules, rebuilt from the live names
+    var all = [].slice.call(grid.querySelectorAll('.pc')), counts = {};
+    all.forEach(function (a) { var b = a.getAttribute('data-b'); if (b) counts[b] = (counts[b] || 0) + 1; });
+    var brands = Object.keys(counts).sort(function (x, y) { return counts[y] - counts[x] || x.localeCompare(y); });
+    var row = document.querySelector('.pf-brands'), css = '', pf = document.querySelector('.pf');
+    if (row) {
+      row.innerHTML = '<span class="pf-label">Marca</span>' + brands.map(function (b) { return '<a href="#f-marca-' + slug(b) + '">' + esc(b) + ' <small>' + counts[b] + '</small></a>'; }).join('');
+      brands.forEach(function (b) {
+        var id = 'f-marca-' + slug(b);
+        if (!document.getElementById(id)) { var s = document.createElement('span'); s.className = 'pf-t'; s.id = id; pf.parentNode.insertBefore(s, pf); }
+        css += 'html:has(#' + id + ':target) .pc:not([data-b="' + b.replace(/"/g, '') + '"]){display:none}html:has(#' + id + ':target) .pf a[href="#' + id + '"]{background:var(--ink);color:var(--cream)}';
+      });
+      var st = document.createElement('style');
+      st.textContent = css;
+      document.head.appendChild(st);
+    }
+    // counts on the gender / type chips
+    [].forEach.call(document.querySelectorAll('.pf-row:not(.pf-brands) a'), function (a) {
+      var k = a.getAttribute('href').slice(3), n = all.length;
+      if (k !== 'todos') {
+        var att = (k === 'mujer' || k === 'hombre') ? 'g' : 't';
+        n = all.filter(function (c) { return c.getAttribute('data-' + att) === k; }).length;
+      }
+      var sm = a.querySelector('small');
+      if (sm) sm.textContent = n;
+    });
+    if (location.hash) { var h = location.hash; location.hash = ''; location.hash = h; }
+  }).catch(function () {});
+})();
+</script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Jost:wght@400;500;600&display=swap');
 html{overflow-x:hidden}
@@ -1132,13 +1205,6 @@ color:var(--cream)!important;font-size:13px;font-weight:500;letter-spacing:.16em
 .ph-banner p.ph-sub{margin:12px auto 0;max-width:520px;color:var(--muted)}
 .ph-help{background:var(--cream);text-align:center;padding:28px 24px 36px;font-size:15px;color:var(--muted)}
 .ph-help a{color:var(--ink);border-bottom:1px solid var(--gold-line);font-weight:500}
-.ph-about{display:grid;grid-template-columns:1.05fr 1fr;gap:72px;align-items:center}
-.ph-about-copy h1{margin:10px 0 24px;font-size:clamp(40px,4.6vw,64px)}
-.ph-about-copy p:not(.ph-eyebrow){color:var(--muted);font-size:17px}
-.ph-about-copy p+p{margin-top:16px}
-.ph-about-img{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.ph-about-img img{width:100%;aspect-ratio:3/4;object-fit:cover}
-.ph-about-img img:last-child{margin-top:48px}
 .ph-values{background:var(--sand)}
 .ph-values ul{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
 .ph-values li{background:var(--cream);padding:36px 30px}
@@ -1173,7 +1239,10 @@ color:var(--cream)!important;font-size:13px;font-weight:500;letter-spacing:.16em
 .pc-name{display:block;margin-top:12px;font-family:var(--serif);font-size:22px;font-weight:600;line-height:1.15}
 .pc-code{display:block;margin-top:3px;font-size:12px;letter-spacing:.14em;color:var(--muted)}
 .pc-price{display:block;margin-top:6px;font-size:15px;font-weight:500}
-.pf{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 40px}
+.pf{margin:0 0 40px}
+.pf-row{display:flex;flex-wrap:wrap;gap:8px}
+.pf-brands{margin-top:12px;align-items:center}
+.pf-label{font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;opacity:.6;margin-right:4px}
 .pf a{display:inline-flex;align-items:center;gap:7px;min-height:42px;padding:0 14px;border:1px solid var(--ink);font-size:12px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;transition:background .2s,color .2s}
 .pf a:hover{background:var(--sand)}
 .pf small{font-size:11px;letter-spacing:.04em;opacity:.65}
@@ -1211,10 +1280,10 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
 @keyframes ph-rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @keyframes ph-settle{from{transform:scale(1.05)}to{transform:scale(1)}}
 @keyframes ph-ring{0%{box-shadow:0 6px 20px rgba(20,18,19,.28),0 0 0 0 rgba(198,178,152,.6)}70%,100%{box-shadow:0 6px 20px rgba(20,18,19,.28),0 0 0 16px rgba(198,178,152,0)}}
-:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap,.ph-about-copy)>*{animation:ph-rise .9s cubic-bezier(.16,1,.3,1) both}
-:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap,.ph-about-copy)>:nth-child(2){animation-delay:.1s}
-:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap,.ph-about-copy)>:nth-child(3){animation-delay:.2s}
-:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap,.ph-about-copy)>:nth-child(n+4){animation-delay:.3s}
+:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap)>*{animation:ph-rise .9s cubic-bezier(.16,1,.3,1) both}
+:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap)>:nth-child(2){animation-delay:.1s}
+:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap)>:nth-child(3){animation-delay:.2s}
+:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap)>:nth-child(n+4){animation-delay:.3s}
 .ph-hero-img{animation:ph-settle 2s cubic-bezier(.16,1,.3,1) both}
 .ph-wa{animation:ph-ring 2.4s ease-out 3s 3}
 .ph .ph-rv{opacity:0;transform:translateY(18px);transition:opacity .8s cubic-bezier(.16,1,.3,1) var(--d,0s),transform .9s cubic-bezier(.16,1,.3,1) var(--d,0s)}
@@ -1237,7 +1306,6 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
 .ph-tile-label h3{font-size:28px}
 .ph-tile-label span{display:none}
 .ph-steps ol{grid-template-columns:1fr;gap:36px}
-.ph-about{grid-template-columns:1fr;gap:40px}
 .ph-values ul{grid-template-columns:1fr}
 .ph-footer-grid{grid-template-columns:1fr 1fr;gap:40px 24px}
 .ph-footer-grid>div:first-child,.ph-footer-grid>div:last-child{grid-column:1/-1}}
@@ -1249,7 +1317,8 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
 .ph-cards{grid-template-columns:1fr}
 .ph-pgrid{grid-template-columns:repeat(2,1fr);gap:28px 12px}
 .pc-name{font-size:19px}
-.pf{gap:6px;margin-bottom:28px}
+.pf{margin-bottom:28px}
+.pf-row{gap:6px}
 .pf a{min-height:36px;padding:0 11px;font-size:11px}
 .ph-featured-head .ph-wrap{flex-direction:column;align-items:flex-start;gap:14px}
 .ph-logo img{height:68px}
@@ -1257,6 +1326,7 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
 .ph-actions .ph-btn{flex:1 1 100%}
 }
 @media(prefers-reduced-motion:reduce){.ph *{transition:none!important;animation:none!important}.ph .ph-rv{opacity:1;transform:none}}
+.ec-review-stars,.review-component,.ec-review-heading,.ec-ratings-distribution{display:none!important}
 </style>
 <div class="ph">
   <section class="ph-bleed ph-steps ph-section">
@@ -1387,13 +1457,6 @@ color:var(--cream)!important;font-size:13px;font-weight:500;letter-spacing:.16em
 .ph-banner p.ph-sub{margin:12px auto 0;max-width:520px;color:var(--muted)}
 .ph-help{background:var(--cream);text-align:center;padding:28px 24px 36px;font-size:15px;color:var(--muted)}
 .ph-help a{color:var(--ink);border-bottom:1px solid var(--gold-line);font-weight:500}
-.ph-about{display:grid;grid-template-columns:1.05fr 1fr;gap:72px;align-items:center}
-.ph-about-copy h1{margin:10px 0 24px;font-size:clamp(40px,4.6vw,64px)}
-.ph-about-copy p:not(.ph-eyebrow){color:var(--muted);font-size:17px}
-.ph-about-copy p+p{margin-top:16px}
-.ph-about-img{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.ph-about-img img{width:100%;aspect-ratio:3/4;object-fit:cover}
-.ph-about-img img:last-child{margin-top:48px}
 .ph-values{background:var(--sand)}
 .ph-values ul{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
 .ph-values li{background:var(--cream);padding:36px 30px}
@@ -1428,7 +1491,10 @@ color:var(--cream)!important;font-size:13px;font-weight:500;letter-spacing:.16em
 .pc-name{display:block;margin-top:12px;font-family:var(--serif);font-size:22px;font-weight:600;line-height:1.15}
 .pc-code{display:block;margin-top:3px;font-size:12px;letter-spacing:.14em;color:var(--muted)}
 .pc-price{display:block;margin-top:6px;font-size:15px;font-weight:500}
-.pf{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 40px}
+.pf{margin:0 0 40px}
+.pf-row{display:flex;flex-wrap:wrap;gap:8px}
+.pf-brands{margin-top:12px;align-items:center}
+.pf-label{font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;opacity:.6;margin-right:4px}
 .pf a{display:inline-flex;align-items:center;gap:7px;min-height:42px;padding:0 14px;border:1px solid var(--ink);font-size:12px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;transition:background .2s,color .2s}
 .pf a:hover{background:var(--sand)}
 .pf small{font-size:11px;letter-spacing:.04em;opacity:.65}
@@ -1466,10 +1532,10 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
 @keyframes ph-rise{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 @keyframes ph-settle{from{transform:scale(1.05)}to{transform:scale(1)}}
 @keyframes ph-ring{0%{box-shadow:0 6px 20px rgba(20,18,19,.28),0 0 0 0 rgba(198,178,152,.6)}70%,100%{box-shadow:0 6px 20px rgba(20,18,19,.28),0 0 0 16px rgba(198,178,152,0)}}
-:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap,.ph-about-copy)>*{animation:ph-rise .9s cubic-bezier(.16,1,.3,1) both}
-:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap,.ph-about-copy)>:nth-child(2){animation-delay:.1s}
-:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap,.ph-about-copy)>:nth-child(3){animation-delay:.2s}
-:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap,.ph-about-copy)>:nth-child(n+4){animation-delay:.3s}
+:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap)>*{animation:ph-rise .9s cubic-bezier(.16,1,.3,1) both}
+:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap)>:nth-child(2){animation-delay:.1s}
+:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap)>:nth-child(3){animation-delay:.2s}
+:is(.ph-hero-copy,.ph-banner .ph-wrap,.ph-thanks .ph-wrap,.ph-contact-head .ph-wrap)>:nth-child(n+4){animation-delay:.3s}
 .ph-hero-img{animation:ph-settle 2s cubic-bezier(.16,1,.3,1) both}
 .ph-wa{animation:ph-ring 2.4s ease-out 3s 3}
 .ph .ph-rv{opacity:0;transform:translateY(18px);transition:opacity .8s cubic-bezier(.16,1,.3,1) var(--d,0s),transform .9s cubic-bezier(.16,1,.3,1) var(--d,0s)}
@@ -1492,7 +1558,6 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
 .ph-tile-label h3{font-size:28px}
 .ph-tile-label span{display:none}
 .ph-steps ol{grid-template-columns:1fr;gap:36px}
-.ph-about{grid-template-columns:1fr;gap:40px}
 .ph-values ul{grid-template-columns:1fr}
 .ph-footer-grid{grid-template-columns:1fr 1fr;gap:40px 24px}
 .ph-footer-grid>div:first-child,.ph-footer-grid>div:last-child{grid-column:1/-1}}
@@ -1504,7 +1569,8 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
 .ph-cards{grid-template-columns:1fr}
 .ph-pgrid{grid-template-columns:repeat(2,1fr);gap:28px 12px}
 .pc-name{font-size:19px}
-.pf{gap:6px;margin-bottom:28px}
+.pf{margin-bottom:28px}
+.pf-row{gap:6px}
 .pf a{min-height:36px;padding:0 11px;font-size:11px}
 .ph-featured-head .ph-wrap{flex-direction:column;align-items:flex-start;gap:14px}
 .ph-logo img{height:68px}
@@ -1512,6 +1578,7 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
 .ph-actions .ph-btn{flex:1 1 100%}
 }
 @media(prefers-reduced-motion:reduce){.ph *{transition:none!important;animation:none!important}.ph .ph-rv{opacity:1;transform:none}}
+.ec-review-stars,.review-component,.ec-review-heading,.ec-ratings-distribution{display:none!important}
 </style>
 <div class="ph">
   <footer class="ph-bleed ph-footer">
@@ -1542,7 +1609,6 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
         <div>
           <h4>Ayuda</h4>
           <ul>
-            <li><a href="/nosotros">Nosotros</a></li>
             <li><a href="/contacto">Contacto</a></li>
             <li><a href="/contacto#preguntas">Preguntas frecuentes</a></li>
             <li><a href="/cart">Mi carrito</a></li>
@@ -1569,7 +1635,7 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
 (function () {
   if (!('IntersectionObserver' in window)) return;
   if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  var TARGETS = '.ph-head,.ph-featured-head .ph-wrap,.ph-tile,.ph-pgrid .pc,.ph-step,.ph-values li,.ph-about-img,.ph-news .ph-wrap,.ph-cta .ph-wrap,.ph-faq details,.ph-footer-grid>div,.ph-help p';
+  var TARGETS = '.ph-head,.ph-featured-head .ph-wrap,.ph-tile,.ph-pgrid .pc,.ph-step,.ph-values li,.ph-news .ph-wrap,.ph-cta .ph-wrap,.ph-faq details,.ph-footer-grid>div,.ph-help p';
   function start() {
     var seen = new Map();
     var io = new IntersectionObserver(function (entries) {
