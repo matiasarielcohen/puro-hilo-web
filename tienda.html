@@ -929,8 +929,23 @@ html:not(:has(.pf-t:target)) .pf a[href="#f-todos"]{background:var(--ink);color:
   }
   function money(n) { return 'AR$ ' + Math.round(n).toLocaleString('es-AR'); }
   function img(src) { return 'https://images.leadconnectorhq.com/image/f_webp/q_80/r_600/u_' + src; }
-  fetch('https://puro-hilo.flujo.com.ar/products.json').then(function (r) { return r.ok ? r.json() : Promise.reject(); }).then(function (d) {
-    var list = d.products || [];
+  // same order build.py gives the baked cards: round-robin across (gender, type) groups, so the first rows mix men's and women's pieces
+  function shopOrder(items) {
+    var groups = {}, keys = [], out = [];
+    items.slice().sort(function (a, b) { return a.s < b.s ? -1 : a.s > b.s ? 1 : 0; }).forEach(function (p) {
+      var c = classify(p.n), k = c.g + '|' + c.t;
+      if (!groups[k]) { groups[k] = []; keys.push(k); }
+      groups[k].push(p);
+    });
+    var queues = keys.map(function (k) { return groups[k]; }).sort(function (a, b) { return b.length - a.length; });
+    while (queues.some(function (q) { return q.length; })) queues.forEach(function (q) { if (q.length) out.push(q.shift()); });
+    return out;
+  }
+  // GHL's public store endpoint (no token, CORS open): the same one its own store pages use
+  fetch('https://backend.leadconnectorhq.com/products/public/?locationId=MvmUL33EtUoUyH184hmv&limit=200').then(function (r) { return r.ok ? r.json() : Promise.reject(); }).then(function (d) {
+    var list = shopOrder((d.products || []).filter(function (p) { return p.slug && p.isAvailable !== false; }).map(function (p) {
+      return { n: p.name, s: p.slug, i: p.image || '', p: p.amount > 0 ? p.amount : null };
+    }));
     if (!list.length) return;
     // the home grid mirrors the first 8 products of the shop (the feed is written in shop order); the shop shows them all
     var target = grid || grids[0], items = grid ? list : list.slice(0, 8);
