@@ -972,7 +972,7 @@ html:not(:has(.pf-t:target)) .pf a[href="#f-todos"]{background:var(--ink);color:
       var pr = a.querySelector('.pc-price');
       if (p.p) {
         if (!pr) { pr = document.createElement('span'); pr.className = 'pc-price'; a.appendChild(pr); }
-        pr.textContent = 'Desde ' + money(p.p);
+        pr.textContent = money(p.p);
       } else if (pr) pr.remove();
       var im = a.querySelector('img');
       if (im) {
@@ -1310,6 +1310,24 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
       el.classList.add('ph-rv');
       io.observe(el);
     });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+})();
+</script>
+<script>
+// GHL's native product page prints the price as "AR$26500.00": put a space after "AR$". GHL re-renders the price when the
+// variant changes, so watch the page and fix it each time; once fixed the text no longer matches, so this cannot loop.
+(function () {
+  var SEL = '.hl-product-detail-product-price';
+  function fix() {
+    document.querySelectorAll(SEL).forEach(function (el) {
+      var t = el.textContent;
+      if (/^\s*AR\$\d/.test(t)) el.textContent = t.replace('AR$', 'AR$ ');
+    });
+  }
+  function start() {
+    fix();
+    new MutationObserver(fix).observe(document.body, { childList: true, subtree: true, characterData: true });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
 })();
