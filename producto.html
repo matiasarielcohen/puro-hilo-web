@@ -1039,19 +1039,63 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
 })();
 </script>
 <script>
-// GHL's native product page prints the price as "AR$26500.00": put a space after "AR$". GHL re-renders the price when the
-// variant changes, so watch the page and fix it each time; once fixed the text no longer matches, so this cannot loop.
+// GHL's native product page, cart and checkout print prices as "AR$12250.00" (or "AR$ 12250.00"): show them like the shop
+// cards do, "AR$ 12.250" (thousand dots, no ".00"). GHL re-renders prices when the variant, quantity or shipping changes,
+// so watch the page and fix again each time; once fixed the text no longer matches (3 digits after the dot, not 2), so this
+// cannot loop. Only "AR$" followed by digits and exactly 2 decimals is touched; script and style text is skipped.
 (function () {
-  var SEL = '.hl-product-detail-product-price';
+  var money = new Intl.NumberFormat('es-AR', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  var PRICE = /AR\$ ?(\d+\.\d{2})(?!\d)/g;
+  var timer = 0;
   function fix() {
-    document.querySelectorAll(SEL).forEach(function (el) {
-      var t = el.textContent;
-      if (/^\s*AR\$\d/.test(t)) el.textContent = t.replace('AR$', 'AR$ ');
+    timer = 0;
+    var w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
+      acceptNode: function (n) {
+        var p = n.parentNode && n.parentNode.nodeName;
+        return p === 'SCRIPT' || p === 'STYLE' || n.nodeValue.indexOf('AR$') === -1 ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    var n;
+    while ((n = w.nextNode())) {
+      var t = n.nodeValue.replace(PRICE, function (m, num) { return 'AR$ ' + money.format(parseFloat(num)); });
+      if (t !== n.nodeValue) n.nodeValue = t;
+    }
+  }
+  function later() { if (!timer) timer = setTimeout(fix, 50); }
+  function start() {
+    fix();
+    new MutationObserver(later).observe(document.body, { childList: true, subtree: true, characterData: true });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+})();
+</script>
+<script>
+// GHL's native checkout (and its Mercado Pago fields) ships a few things we cannot edit in the builder:
+//  - an "Inicia sesion para usar tus direcciones guardadas" link: the store has no customer accounts, so hide it;
+//  - the country list in English: translate each option from its ISO code.
+// (Prices are fixed by price.js.) GHL re-renders the form (province change, shipping method), so watch the page and fix
+// again each time; once translated the option text no longer differs, so this cannot loop.
+(function () {
+  var st = document.createElement('style');
+  st.textContent = '.ec-sa-signin-nudge{display:none!important}';
+  document.head.appendChild(st);
+
+  var names = null;
+  try { names = new Intl.DisplayNames(['es-AR', 'es'], { type: 'region' }); } catch (e) {}
+
+  function fix() {
+    var sel = names && document.querySelector('.hl-store-checkout-container select[name="country"]');
+    if (!sel) return;
+    Array.prototype.forEach.call(sel.options, function (o) {
+      if (!/^[A-Z]{2}$/.test(o.value)) return;
+      var es;
+      try { es = names.of(o.value); } catch (e) { return; }
+      if (es && es !== o.value && o.text !== es) o.text = es;
     });
   }
   function start() {
     fix();
-    new MutationObserver(fix).observe(document.body, { childList: true, subtree: true, characterData: true });
+    new MutationObserver(fix).observe(document.body, { childList: true, subtree: true });
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
 })();
