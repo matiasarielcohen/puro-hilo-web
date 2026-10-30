@@ -219,11 +219,13 @@ async function createGuia(p, { token, dry = false, env = mgEnv(), orderSeen = nu
     if (dry) return { code: 200, obj: { ok: true, dry_run: true, service, warnings, received_keys: receivedKeys, order_seen: orderSeen, guia: { ...guia, api_token: "***" } } };
 
     const out = await mg("v1/public/guias.json", guia);
-    if (!out.ok || !out.json || out.json.status !== "ok") {
+    // MG's real success answer (seen 2026-10-30) is {guia: <number>, sub_zona_destino, importe_por_producto} with no `status`; a refusal carries status "error"
+    const made = out.ok && out.json && out.json.status !== "error" && (out.json.guia || out.json.status === "ok");
+    if (!made) {
       console.log(`mg-guia: MG refused remito ${guia.remito}: ${out.status} ${out.text.slice(0, 200)}`);
       return { code: 502, obj: { ok: false, error: `MG guias -> ${out.status} ${out.text.slice(0, 300)}`, warnings } };
     }
-    console.log(`mg-guia: created remito ${guia.remito} service ${service} cp ${r.cp}`);
+    console.log(`mg-guia: created remito ${guia.remito} guia ${typeof out.json.guia === "object" ? "" : out.json.guia} service ${service} cp ${r.cp}`);
     return { code: 200, obj: { ok: true, service, remito: guia.remito, warnings, mg: out.json } };
   } catch (e) {
     console.log(`mg-guia: error ${e.message}`);

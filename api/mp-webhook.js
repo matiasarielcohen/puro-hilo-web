@@ -137,7 +137,7 @@ async function handler(req, res) {
     }, { token: mgToken, dry: process.env.MG_DRY_RUN === "1" });
     if (guia.obj.unprocessable) console.log(`mp-webhook: order ${m.ref} paid but MG cannot ship it: ${guia.obj.error}`); // address problem: retrying will not help, someone has to call the buyer
     else if (guia.code >= 400) return send(500, { ok: false, error: "MG guia failed", mg: guia.obj.error });
-    return send(200, { ok: true, order: m.ref, payment: payment.id, contact: contactId, guia: guia.obj.skipped || guia.obj.dry_run ? guia.obj : { ok: guia.obj.ok, remito: guia.obj.remito } });
+    return send(200, { ok: true, order: m.ref, payment: payment.id, contact: contactId, guia: guia.obj.skipped || guia.obj.dry_run ? guia.obj : { ok: guia.obj.ok, remito: guia.obj.remito, guia: guia.obj.mg && guia.obj.mg.guia } });
   } catch (e) {
     console.log(`mp-webhook: error ${e.message}`);
     return send(500, { ok: false, error: String(e.message).slice(0, 200) });
