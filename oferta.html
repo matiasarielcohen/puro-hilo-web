@@ -1093,4 +1093,245 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
 })();
 </script>
+<script>
+// "Pagar con Mercado Pago" on GHL's native checkout. The native card form (Mercado Pago secure fields) and its pay button are
+// hidden; this button sends the cart, buyer and address to the shop's own endpoint (api/mp-checkout.js), which recomputes the total
+// and answers with a Mercado Pago Checkout Pro link, then sends the customer there. Pay -> back to /checkout (confirmation drawn there); the order is
+// recorded by api/mp-webhook.js. ASCII only (build.py writes the page ASCII); accents are \u escapes.
+// What it reads from the page (checked on the live checkout 2026-10-30, GHL can change any of it):
+//  - cart: localStorage "cart_details_<storeId>" -> products[] { slug, quantity, selectedPrice { _id, name = talle } }
+//  - buyer: input[name=email|name|phone]; coupon: input[name=coupon_code]
+//  - address: GHL keeps city/province/postcode out of the DOM, but when an address is picked it fetches Google's place details
+//    (".../common-google/places/<id>", addressComponents with postal_code). A wrapper around fetch keeps that answer, so the
+//    postcode, province and city come from it. Fallback when none was captured: the text in input[name=Search]
+//    ("Calle 123, Barrio, Ciudad, Provincia, Argentina") plus a postcode field that only then appears.
+//  - cart amount: GHL's ".../products/amount-summary" answer (subtotalWithDiscount = cart after coupon, before shipping), else the
+//    visible ".cart-subtotal" row. Shipping is NOT read from the page: GHL's checkout has no shipping rate for some addresses
+//    (Capital Federal via Google's picker), the server adds it by zone. delivery: input[name=delivery-method] (shipping | pickup)
+(function () {
+  if (!/\/checkout\/?$/.test(location.pathname)) return;
+  // Back from Mercado Pago (it appends status, collection_status, payment_id, preference_id ... to the checkout URL; GHL's own /thank-you
+  // page redirects to the shop when GHL has no order, so the confirmation is drawn here). approved / pending: confirmation instead of the
+  // form, and the cart (kept in this browser, GHL never saw an order) is emptied on approval. Anything else: the checkout with a notice.
+  var ret = new URLSearchParams(location.search);
+  if (ret.has('payment_id') || ret.has('collection_status') || ret.has('preference_id')) {
+    var outcome = ret.get('collection_status') || ret.get('status') || '';
+    var kind = outcome === 'approved' ? 'approved' : (outcome === 'pending' || outcome === 'in_process') ? 'pending' : 'retry';
+    var texts = {
+      approved: ['Pago recibido', '\u00a1Gracias por tu compra!', 'Tu pago fue aprobado. Te escribimos con el seguimiento de tu env\u00edo.'],
+      pending: ['Pago pendiente', 'Estamos esperando tu pago', 'Cuando Mercado Pago lo confirme, te escribimos. Pod\u00e9s cerrar esta p\u00e1gina.'],
+      retry: ['\u00daltimo paso', 'Finalizar compra', 'El pago no se complet\u00f3. Pod\u00e9s intentarlo de nuevo.']
+    }[kind];
+    if (kind === 'approved') {
+      try { Object.keys(localStorage).forEach(function (k) { if (k.indexOf('cart_details_') === 0) localStorage.removeItem(k); }); } catch (e) {}
+    }
+    if (kind !== 'retry') {
+      var hide = document.createElement('style');
+      hide.textContent = '.c-store-checkout,.hl-store-checkout-container{display:none!important}.ph .ph-mp-more{margin-top:26px}';
+      document.head.appendChild(hide);
+    }
+    var paint = function () {
+      var box = document.querySelector('.ph-banner .ph-wrap');
+      if (!box) return false;
+      box.querySelector('.ph-eyebrow').textContent = texts[0];
+      box.querySelector('h1').textContent = texts[1];
+      box.querySelector('.ph-sub').textContent = texts[2];
+      if (kind !== 'retry' && !box.querySelector('.ph-mp-more')) {
+        var more = document.createElement('p');
+        more.className = 'ph-mp-more';
+        var link = document.createElement('a');
+        link.className = 'ph-btn';
+        link.href = '/products-list';
+        link.textContent = 'Seguir comprando';
+        more.appendChild(link);
+        box.appendChild(more);
+      }
+      return true;
+    };
+    if (!paint()) new MutationObserver(function (m, o) { if (paint()) o.disconnect(); }).observe(document.body, { childList: true, subtree: true });
+    if (kind !== 'retry') return;
+  }
+  var ENDPOINT = 'https://puro-hilo.flujo.com.ar/api/mp-checkout';
+
+  var st = document.createElement('style');
+  st.textContent =
+    '.payment-container .w-100,#make-payment{display:none!important}' +
+    '.ph-mp{margin:8px 0 18px;font-family:"Jost","Helvetica Neue",Arial,sans-serif;color:#141213}' +
+    '.ph-mp label{display:block;font-size:14px;font-weight:500;margin:0 0 6px}' +
+    '.ph-mp input{width:100%;box-sizing:border-box;height:46px;padding:0 14px;border:1px solid #DDD1C3;border-radius:2px;font:inherit;font-size:16px;background:#fff;margin-bottom:14px}' +
+    '.ph-mp-btn{display:block;width:100%;height:52px;border:0;border-radius:2px;background:#141213;color:#F6F0EB;font:inherit;font-size:14px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;cursor:pointer}' +
+    '.ph-mp-btn[disabled]{opacity:.55;cursor:wait}' +
+    '.ph-mp-ship{margin:0 0 14px;font-size:15px;font-weight:500}' +
+    '.ph-mp-msg{margin:12px 0 0;font-size:14px;line-height:1.5;color:#9B2C2C;min-height:1px}' +
+    '.ph-mp-note{margin:10px 0 0;font-size:13px;color:#5E5853}';
+  document.head.appendChild(st);
+
+  var place = null; // last place details GHL fetched for the address picker
+  var summary = null; // last cart amounts GHL computed (subtotalWithDiscount ...)
+  var realFetch = window.fetch;
+  window.fetch = function (input) {
+    var p = realFetch.apply(this, arguments);
+    try {
+      var url = String((input && input.url) || input);
+      if (/common-google\/places\/(?!autocomplete)/.test(url)) {
+        p.then(function (r) { return r.clone().json(); }).then(function (j) {
+          var mine = place = readPlace(j);
+          mine.typed = val('Search');
+          setTimeout(function () { if (place === mine) { mine.typed = val('Search'); showQuote(); } }, 800); // GHL writes the picked address into the field around now
+          showQuote();
+        }).catch(function () {});
+      } else if (/\/products\/amount-summary/.test(url)) { // cart or coupon changed: GHL recomputed, so refresh ours
+        p.then(function (r) { return r.clone().json(); }).then(function (j) { summary = j && j.summary; setTimeout(showQuote, 300); }).catch(function () {});
+      }
+    } catch (e) {}
+    return p;
+  };
+  function comp(j, type, short) {
+    var c = (j.addressComponents || []).filter(function (x) { return x.types && x.types.indexOf(type) !== -1; })[0];
+    return c ? String((short ? c.shortText : c.longText) || c.longText || '') : '';
+  }
+  function readPlace(j) {
+    var cp = (comp(j, 'postal_code').match(/\d{4}/) || [''])[0]; // "C1043" / "S2000" -> 1043 / 2000
+    if (!cp) cp = (String(j.formattedAddress || '').split(',').slice(1).join(',').match(/\b[A-Z]?(\d{4})[A-Z]{0,3}\b/) || ['', ''])[1];
+    var route = comp(j, 'route', true), number = comp(j, 'street_number');
+    return {
+      route: route, routeLong: comp(j, 'route'),
+      address1: (route + ' ' + number).trim(),
+      city: comp(j, 'locality') || comp(j, 'administrative_area_level_2'),
+      state: comp(j, 'administrative_area_level_1'), cp: cp
+    };
+  }
+  function placeIsCurrent() { // the address field still holds exactly what it held when the place was picked (typing anything else makes it stale)
+    return !!(place && place.typed && val('Search') === place.typed);
+  }
+
+  function $(sel) { return document.querySelector(sel); }
+  function val(name) { var e = $('input[name="' + name + '"]'); return e ? String(e.value || '').trim() : ''; }
+  function visible(e) { return !!(e && (e.offsetWidth || e.offsetHeight)); }
+
+  function money(t) { // "AR$ 41.500" or "AR$41500.00" -> 41500
+    var m = String(t).match(/AR\$\s*([\d.,]+)/);
+    if (!m) return 0;
+    var s = m[1];
+    if (/[.,]\d{2}$/.test(s)) s = s.slice(0, -3);
+    return parseInt(s.replace(/[.,]/g, ''), 10) || 0;
+  }
+
+  function cartLines() {
+    var key = Object.keys(localStorage).filter(function (k) { return k.indexOf('cart_details_') === 0; })[0];
+    var cart = null;
+    try { cart = key && JSON.parse(localStorage.getItem(key)); } catch (e) {}
+    return ((cart && cart.products) || []).map(function (p) {
+      return { code: String(p.slug || '').toUpperCase(), size: p.selectedPrice && p.selectedPrice.name, priceId: p.selectedPrice && p.selectedPrice._id, qty: Number(p.quantity) || 1 };
+    });
+  }
+
+  function cartBase() { // the cart after coupon, before shipping
+    if (summary && Number(summary.subtotalWithDiscount) > 0) return Math.round(Number(summary.subtotalWithDiscount));
+    var row = Array.prototype.filter.call(document.querySelectorAll('.cart-subtotal'), visible)[0];
+    return row ? money(row.innerText) : 0;
+  }
+
+  function pesos(n) { return 'AR$ ' + Number(n).toLocaleString('es-AR'); }
+
+  // shipping and total for the picked address, from the server (nothing is created); shown above the button
+  var quoteSeq = 0;
+  function showQuote() {
+    var box = $('.ph-mp-ship');
+    if (!box || !place || !place.cp || !placeIsCurrent()) return;
+    var lines = cartLines();
+    if (!lines.length) return;
+    var seq = ++quoteSeq;
+    var coupon = (($('input[name="coupon_code"]') || {}).value || '').trim();
+    var body = { quote_only: true, items: lines, coupon: coupon, address: { address1: place.address1, city: place.city, state: place.state, postal_code: place.cp } };
+    realFetch(ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json(); })
+      .then(function (j) {
+        if (seq !== quoteSeq) return;
+        box.textContent = j && j.ok ? 'Env\u00edo: ' + pesos(j.quote.shipping) + ' \u00b7 Total a pagar: ' + pesos(j.quote.total) : '';
+      })
+      .catch(function () { if (seq === quoteSeq) box.textContent = ''; });
+  }
+
+  // "Mitre 123, Arminda, Rosario, Santa Fe Province, Argentina" -> { address1, city, state, cp }; CABA comes without "Province" (and often with a "C1043" code)
+  function parseAddress(text, typedCp) {
+    var parts = text.split(',').map(function (s) { return s.trim(); }).filter(Boolean);
+    if (parts.length && /^argentina$/i.test(parts[parts.length - 1])) parts.pop();
+    if (parts.length < 2) return null;
+    var last = parts[parts.length - 1], state, city;
+    var province = last.match(/^(.*?)\s+province$/i);
+    if (province) { state = province[1]; city = parts.length > 2 ? parts[parts.length - 2] : ''; }
+    else { state = last.replace(/\b[A-Z]?\d{4}[A-Z]{0,3}\b/g, '').trim() || 'Buenos Aires'; city = ''; }
+    var cp = String(typedCp || '').replace(/\D/g, '').slice(0, 4);
+    return { address1: parts[0], city: city, state: state, postal_code: cp };
+  }
+
+  function mount() {
+    if ($('.ph-mp')) return;
+    var host = $('.payment-container');
+    if (!host) return;
+    var box = document.createElement('div');
+    box.className = 'ph-mp';
+    box.innerHTML =
+      '<div class="ph-mp-cpbox" style="display:none"><label for="ph-mp-cp">C\u00f3digo postal</label><input id="ph-mp-cp" inputmode="numeric" maxlength="8" autocomplete="postal-code" placeholder="Ej.: 2000"></div>' +
+      '<p class="ph-mp-ship" aria-live="polite"></p>' +
+      '<button type="button" class="ph-mp-btn">Pagar con Mercado Pago</button>' +
+      '<p class="ph-mp-msg" role="alert"></p>' +
+      '<p class="ph-mp-note">Vas a pagar en Mercado Pago con tarjeta, dinero en cuenta u otros medios, y volv\u00e9s ac\u00e1 al terminar.</p>';
+    var footer = host.querySelector('.order-form-footer');
+    host.insertBefore(box, footer || null);
+    box.querySelector('.ph-mp-btn').addEventListener('click', pay);
+  }
+
+  function say(text) { var p = $('.ph-mp-msg'); if (p) p.textContent = text || ''; }
+
+  function pay() {
+    var btn = $('.ph-mp-btn');
+    var pickup = $('input[name="delivery-method"]:checked');
+    if (pickup && pickup.value === 'pickup') return say('Por ahora el pago con Mercado Pago es solo con env\u00edo a domicilio: eleg\u00ed "Env\u00edo".');
+    var email = val('email'), name = val('name'), phone = val('phone');
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return say('Complet\u00e1 un correo electr\u00f3nico v\u00e1lido.');
+    if (!name || !phone) return say('Complet\u00e1 tu nombre y tel\u00e9fono.');
+    var a;
+    if (placeIsCurrent() && place.cp) a = { address1: place.address1, city: place.city, state: place.state, postal_code: place.cp };
+    else {
+      a = parseAddress(val('Search'), ($('#ph-mp-cp') || {}).value); // no place details captured: text + typed postcode
+      if (!a) return say('Busc\u00e1 tu direcci\u00f3n y eleg\u00ed una de la lista.');
+      if (a.postal_code.length < 4) { $('.ph-mp-cpbox').style.display = 'block'; return say('Complet\u00e1 el c\u00f3digo postal (4 n\u00fameros).'); }
+    }
+    var lines = cartLines();
+    if (!lines.length) return say('Tu carrito est\u00e1 vac\u00edo.');
+    var base = cartBase();
+    if (!base) return say('No pudimos leer el total del carrito, recarg\u00e1 la p\u00e1gina.');
+    var coupon = ($('input[name="coupon_code"]') || {}).value || '';
+
+    var parts = name.split(/\s+/);
+    var body = {
+      items: lines, base: String(base), coupon: coupon.trim(),
+      buyer: { first_name: parts[0], last_name: parts.slice(1).join(' '), email: email, phone: phone },
+      address: { address1: a.address1, address2: '', city: a.city, state: a.state, postal_code: a.postal_code }
+    };
+    btn.disabled = true; btn.textContent = 'Abriendo Mercado Pago...'; say('');
+    fetch(ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json().catch(function () { return {}; }).then(function (j) { return { status: r.status, json: j }; }); })
+      .then(function (res) {
+        if (res.json && res.json.ok && res.json.init_point) { location.href = res.json.init_point; return; }
+        var msg = (res.json && res.json.error) || 'No pudimos iniciar el pago, prob\u00e1 de nuevo.';
+        if (res.status === 409 && coupon.trim()) msg = 'El total no coincide con el cup\u00f3n: toc\u00e1 "Aplicar" en el cup\u00f3n y prob\u00e1 de nuevo.';
+        say(msg); btn.disabled = false; btn.textContent = 'Pagar con Mercado Pago';
+      })
+      .catch(function () { say('No pudimos conectar, revis\u00e1 tu conexi\u00f3n y prob\u00e1 de nuevo.'); btn.disabled = false; btn.textContent = 'Pagar con Mercado Pago'; });
+  }
+
+  // GHL re-renders the form (address pick, coupon, shipping): keep the button in place
+  function start() {
+    mount();
+    document.addEventListener('click', function (e) { // a coupon changes the total: refresh the quote once GHL has applied it
+      if (e.target && e.target.closest && e.target.closest('.apply-coupon-btn')) setTimeout(showQuote, 1500);
+    });
+    new MutationObserver(mount).observe(document.body, { childList: true, subtree: true });
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+})();
+</script>
 </div></body></html>
