@@ -1758,7 +1758,7 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
     var outcome = ret.get('collection_status') || ret.get('status') || '';
     var kind = outcome === 'approved' ? 'approved' : (outcome === 'pending' || outcome === 'in_process') ? 'pending' : 'retry';
     var texts = {
-      approved: ['Pago recibido', '\u00a1Gracias por tu compra!', 'Tu pago fue aprobado. Te escribimos con el seguimiento de tu env\u00edo.'],
+      approved: ['Pago recibido', '\u00a1Gracias por tu compra!', ret.has('retiro') ? 'Tu pago fue aprobado. Te escribimos para coordinar el retiro en el local.' : 'Tu pago fue aprobado. Te escribimos con el seguimiento de tu env\u00edo.'],
       pending: ['Pago pendiente', 'Estamos esperando tu pago', 'Cuando Mercado Pago lo confirme, te escribimos. Pod\u00e9s cerrar esta p\u00e1gina.'],
       retry: ['\u00daltimo paso', 'Finalizar compra', 'El pago no se complet\u00f3. Pod\u00e9s intentarlo de nuevo.']
     }[kind];
@@ -1876,19 +1876,24 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
 
   // shipping and total for the picked address, from the server (nothing is created); shown above the button
   var quoteSeq = 0;
+  function isPickup() { var d = $('input[name="delivery-method"]:checked'); return !!(d && d.value === 'pickup'); }
+
   function showQuote() {
     var box = $('.ph-mp-ship');
-    if (!box || !place || !place.cp || !placeIsCurrent()) return;
+    var pickup = isPickup();
+    if (!box) return;
+    if (!pickup && (!place || !place.cp || !placeIsCurrent())) { if (!place) box.textContent = ''; return; }
     var lines = cartLines();
     if (!lines.length) return;
     var seq = ++quoteSeq;
     var coupon = (($('input[name="coupon_code"]') || {}).value || '').trim();
-    var body = { quote_only: true, items: lines, coupon: coupon, address: { address1: place.address1, city: place.city, state: place.state, postal_code: place.cp } };
+    var body = { quote_only: true, items: lines, coupon: coupon };
+    if (pickup) body.delivery = 'pickup'; else body.address = { address1: place.address1, city: place.city, state: place.state, postal_code: place.cp };
     realFetch(ENDPOINT, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
       .then(function (r) { return r.json(); })
       .then(function (j) {
         if (seq !== quoteSeq) return;
-        box.textContent = j && j.ok ? 'Env\u00edo: ' + pesos(j.quote.shipping) + ' \u00b7 Total a pagar: ' + pesos(j.quote.total) : '';
+        box.textContent = j && j.ok ? (pickup ? 'Retiro en el local: sin costo' : 'Env\u00edo: ' + pesos(j.quote.shipping)) + ' \u00b7 Total a pagar: ' + pesos(j.quote.total) : '';
       })
       .catch(function () { if (seq === quoteSeq) box.textContent = ''; });
   }
@@ -1907,7 +1912,9 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
   }
 
   function mount() {
-    if ($('.ph-mp')) return;
+    var old = $('.ph-mp');
+    if (old && old.querySelector('.ph-mp-btn')) return;
+    if (old) old.remove(); // GHL's own render can overwrite a box added while the page was still loading (seen live 2026-10-30): rebuild it
     var host = $('.payment-container');
     if (!host) return;
     var box = document.createElement('div');
@@ -1927,13 +1934,13 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
 
   function pay() {
     var btn = $('.ph-mp-btn');
-    var pickup = $('input[name="delivery-method"]:checked');
-    if (pickup && pickup.value === 'pickup') return say('Por ahora el pago con Mercado Pago es solo con env\u00edo a domicilio: eleg\u00ed "Env\u00edo".');
+    var pickup = isPickup();
     var email = val('email'), name = val('name'), phone = val('phone');
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return say('Complet\u00e1 un correo electr\u00f3nico v\u00e1lido.');
     if (!name || !phone) return say('Complet\u00e1 tu nombre y tel\u00e9fono.');
     var a;
-    if (placeIsCurrent() && place.cp) a = { address1: place.address1, city: place.city, state: place.state, postal_code: place.cp };
+    if (pickup) a = { address1: '', city: '', state: '', postal_code: '' }; // collected at the local: no address
+    else if (placeIsCurrent() && place.cp) a = { address1: place.address1, city: place.city, state: place.state, postal_code: place.cp };
     else {
       a = parseAddress(val('Search'), ($('#ph-mp-cp') || {}).value); // no place details captured: text + typed postcode
       if (!a) return say('Busc\u00e1 tu direcci\u00f3n y eleg\u00ed una de la lista.');
@@ -1947,7 +1954,7 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
 
     var parts = name.split(/\s+/);
     var body = {
-      items: lines, base: String(base), coupon: coupon.trim(),
+      items: lines, base: String(base), coupon: coupon.trim(), delivery: pickup ? 'pickup' : 'shipping',
       buyer: { first_name: parts[0], last_name: parts.slice(1).join(' '), email: email, phone: phone },
       address: { address1: a.address1, address2: '', city: a.city, state: a.state, postal_code: a.postal_code }
     };
@@ -1966,6 +1973,9 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
   // GHL re-renders the form (address pick, coupon, shipping): keep the button in place
   function start() {
     mount();
+    document.addEventListener('change', function (e) { // Envio <-> Retiro: the quote line changes with it
+      if (e.target && e.target.name === 'delivery-method') setTimeout(showQuote, 400);
+    });
     document.addEventListener('click', function (e) { // a coupon changes the total: refresh the quote once GHL has applied it
       if (e.target && e.target.closest && e.target.closest('.apply-coupon-btn')) setTimeout(showQuote, 1500);
     });

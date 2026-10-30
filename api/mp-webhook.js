@@ -1,6 +1,7 @@
 // Puro Hilo: Mercado Pago tells us a payment changed. Only an APPROVED payment does anything: it is fetched from Mercado Pago's API
 // (the notification itself is never trusted), its amount must equal the one /api/mp-checkout charged, then
 //   1. the buyer becomes a GHL contact (tag pago-mercadopago) with a note listing products, totals and the payment id,
+//      (a pickup order, metadata delivery "pickup": tag "retiro", no address, no guia: the note tells the shop to arrange the retiro),
 //   2. the MG Logistica guia is created through the same code as /api/mg-guia (createGuia, remito = order ref).
 // Mercado Pago sends several notifications per payment (created, updated, retries), sometimes at the same moment, so the order note
 // doubles as a claim: the first note for a payment id wins (see claim()), later notifications skip. A failed run leaves its note
@@ -51,7 +52,7 @@ function noteFor(payment, m, items) {
     `Pedido ${m.ref}`,
     ...lines,
     `Subtotal ${peso(m.subtotal)}` + (Number(m.discount) ? ` | Cupon ${m.coupon} -${peso(m.discount)}` : "") + ` | Envio ${peso(m.shipping)} (${m.zone}) | Total ${peso(m.total)}`,
-    `Entrega: ${[m.address1, m.address2, m.city, m.state, m.postal_code].filter(Boolean).join(", ")}`,
+    m.delivery === "pickup" ? "RETIRO EN EL LOCAL (sin envio, no se crea guia MG): coordinar el retiro con el cliente." : `Entrega: ${[m.address1, m.address2, m.city, m.state, m.postal_code].filter(Boolean).join(", ")}`,
   ].join("\n");
 }
 
@@ -113,19 +114,22 @@ async function handler(req, res) {
       return send(200, { ok: false, error: "amount mismatch, order not processed" }); // 200: retrying cannot fix it, the log line is the alert
     }
     const items = parseOrderItems(m.items);
+    const pickup = m.delivery === "pickup";
     const ghl = { Authorization: `Bearer ${pit}`, Version: "2021-07-28" };
 
     // 1. contact, then the claim note (see claim())
     const up = await api(`${GHL}/contacts/upsert`, { method: "POST", headers: ghl, body: {
       locationId: LOCATION, firstName: m.first_name, lastName: m.last_name, email: m.email, phone: m.phone || undefined,
-      address1: m.address1, city: m.city, state: m.state, postalCode: m.postal_code, country: "AR", tags: ["pago-mercadopago"], source: "Mercado Pago",
+      ...(pickup ? {} : { address1: m.address1, city: m.city, state: m.state, postalCode: m.postal_code, country: "AR" }),
+      tags: pickup ? ["pago-mercadopago", "retiro"] : ["pago-mercadopago"], source: "Mercado Pago",
     } });
     const contactId = up.json && up.json.contact && up.json.contact.id;
     if (!up.ok || !contactId) { console.log(`mp-webhook: GHL upsert ${up.status} ${up.txt.slice(0, 200)}`); return send(500, { ok: false, error: "GHL contact failed" }); }
     const who = await claim(contactId, payment, m, items, ghl, Number(process.env.CLAIM_WAIT_MS ?? 1500));
     if (who === "skip") { console.log(`mp-webhook: payment ${payment.id} is handled by another notification`); return send(200, { ok: true, skipped: "handled by another notification", order: m.ref }); }
 
-    // 2. MG guia
+    // 2. MG guia (a pickup has nothing to ship: the note and the "retiro" tag are the notice)
+    if (pickup) { console.log(`mp-webhook: order ${m.ref} is a pickup, no MG guia`); return send(200, { ok: true, order: m.ref, payment: payment.id, contact: contactId, pickup: true }); }
     const guia = await createGuia({
       first_name: m.first_name, last_name: m.last_name, email: m.email, phone: m.phone,
       address1: m.address1, address2: m.address2, city: m.city, state: m.state, postal_code: m.postal_code,
