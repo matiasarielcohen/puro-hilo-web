@@ -1007,6 +1007,15 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
   var quoteSeq = 0;
   function isPickup() { var d = $('input[name="delivery-method"]:checked'); return !!(d && d.value === 'pickup'); }
 
+  // the store picked for the retiro: "Sede Balvanera - C. Bartolome Mitre 2677, CABA, BA, C1039" (GHL's store-location-card lines)
+  function pickupPlace() {
+    var r = $('input[name="store-location"]:checked'), card = r && r.closest('.store-location-card');
+    if (!card) return '';
+    var lines = card.innerText.split('\n').map(function (s) { return s.trim(); }).filter(Boolean);
+    var addr = lines.filter(function (l) { return l.indexOf(',') !== -1 && /\d/.test(l); })[0];
+    return (lines[0] || '') + (addr ? ' - ' + addr : '');
+  }
+
   function showQuote() {
     var box = $('.ph-mp-ship');
     var pickup = isPickup();
@@ -1064,7 +1073,8 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
   function pay() {
     var btn = $('.ph-mp-btn');
     var pickup = isPickup();
-    var email = val('email'), name = val('name'), phone = val('phone');
+    // GHL renames the fields when "Retiro" is picked (std_billing_address_fullName / _phone), so read both names
+    var email = val('email'), name = val('name') || val('std_billing_address_fullName'), phone = val('phone') || val('std_billing_address_phone');
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return say('Complet\u00e1 un correo electr\u00f3nico v\u00e1lido.');
     if (!name || !phone) return say('Complet\u00e1 tu nombre y tel\u00e9fono.');
     var a;
@@ -1083,7 +1093,7 @@ background:var(--ink);border:2px solid var(--gold-line);box-shadow:0 6px 20px rg
 
     var parts = name.split(/\s+/);
     var body = {
-      items: lines, base: String(base), coupon: coupon.trim(), delivery: pickup ? 'pickup' : 'shipping',
+      items: lines, base: String(base), coupon: coupon.trim(), delivery: pickup ? 'pickup' : 'shipping', pickup_location: pickup ? pickupPlace() : '',
       buyer: { first_name: parts[0], last_name: parts.slice(1).join(' '), email: email, phone: phone },
       address: { address1: a.address1, address2: '', city: a.city, state: a.state, postal_code: a.postal_code }
     };

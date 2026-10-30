@@ -56,7 +56,7 @@ async function quote(body, { pit } = {}) {
   const address = cleanAddress(body.address);
   if (!buyer.first_name || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(buyer.email)) throw new Error("Complet\u00e1 tu nombre y email");
   if (!isPickup(body) && !address.address1) throw new Error("Complet\u00e1 tu direcci\u00f3n y c\u00f3digo postal");
-  return { buyer, address, delivery: isPickup(body) ? "pickup" : "shipping", ...(await price(body, address, { pit })) };
+  return { buyer, address, delivery: isPickup(body) ? "pickup" : "shipping", pickup_location: isPickup(body) ? text(body.pickup_location, 120) : "", ...(await price(body, address, { pit })) };
 }
 
 async function handler(req, res) {
@@ -103,7 +103,7 @@ async function handler(req, res) {
     notification_url: `${base}/api/mp-webhook`,
     statement_descriptor: "PUROHILO",
     metadata: { // flat strings only: Mercado Pago copies metadata to the payment
-      ref, total: String(q.total), subtotal: String(q.subtotal), shipping: String(q.shipping), discount: String(q.discount), coupon: q.coupon, zone: q.zone, delivery: q.delivery,
+      ref, total: String(q.total), subtotal: String(q.subtotal), shipping: String(q.shipping), discount: String(q.discount), coupon: q.coupon, zone: q.zone, delivery: q.delivery, pickup_location: q.pickup_location,
       items: q.items.map((i) => `${i.code}|${i.size}|${i.qty}|${i.unit}`).join(";"),
       first_name: q.buyer.first_name, last_name: q.buyer.last_name, email: q.buyer.email, phone: q.buyer.phone,
       address1: q.address.address1, address2: q.address.address2, city: q.address.city, state: q.address.state, postal_code: q.address.postal_code,

@@ -52,7 +52,7 @@ function noteFor(payment, m, items) {
     `Pedido ${m.ref}`,
     ...lines,
     `Subtotal ${peso(m.subtotal)}` + (Number(m.discount) ? ` | Cupon ${m.coupon} -${peso(m.discount)}` : "") + ` | Envio ${peso(m.shipping)} (${m.zone}) | Total ${peso(m.total)}`,
-    m.delivery === "pickup" ? "RETIRO EN EL LOCAL (sin envio, no se crea guia MG): coordinar el retiro con el cliente." : `Entrega: ${[m.address1, m.address2, m.city, m.state, m.postal_code].filter(Boolean).join(", ")}`,
+    m.delivery === "pickup" ? `RETIRO EN EL LOCAL${m.pickup_location ? ": " + m.pickup_location : ""} (sin envio, no se crea guia MG): coordinar el retiro con el cliente.` : `Entrega: ${[m.address1, m.address2, m.city, m.state, m.postal_code].filter(Boolean).join(", ")}`,
   ].join("\n");
 }
 
