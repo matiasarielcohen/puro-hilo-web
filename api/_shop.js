@@ -9,12 +9,15 @@ const GHL = "https://services.leadconnectorhq.com";
 const LOCATION = "MvmUL33EtUoUyH184hmv";
 const MAX_LINES = 40, MAX_QTY = 50;
 
-// MG's province names (see mg-guia.js). Zone by state, exactly as GHL's checkout does: CABA and the province are both "Buenos Aires".
+// MG's province names (see mg-guia.js). Zones set by Mati on 2026-11-02: CABA 7.000, Buenos Aires province 10.000, the five provinces that
+// border it 15.000, the rest of the country 20.000. The server charges these (mp-checkout); GHL's own shipping rates cannot tell CABA from
+// the province (both are "Buenos Aires" there), which is why the checkout button shows the server's number.
 const ZONES = [
-  { name: "Buenos Aires", fee: 10000, states: ["BUENOS AIRES", "CIUDAD AUTONOMA DE BUENOS AIRES"] },
-  { name: "Centro, Litoral y Cuyo", fee: 15000, states: ["SANTA FE", "ENTRE RIOS", "CORDOBA", "LA PAMPA", "MENDOZA", "SAN LUIS", "SAN JUAN", "CORRIENTES"] },
+  { name: "Capital Federal", fee: 7000, states: ["CIUDAD AUTONOMA DE BUENOS AIRES"] },
+  { name: "Buenos Aires", fee: 10000, states: ["BUENOS AIRES"] },
+  { name: "Limitrofes de Buenos Aires", fee: 15000, states: ["CORDOBA", "ENTRE RIOS", "LA PAMPA", "RIO NEGRO", "SANTA FE"] },
 ];
-const REST_FEE = 20000; // the other 14 states
+const REST_FEE = 20000; // the other 17 states
 const strip = (s) => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "");
 const up = (s) => strip(s).toUpperCase().replace(/\s+/g, " ").trim();
 

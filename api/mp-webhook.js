@@ -106,7 +106,15 @@ async function handler(req, res) {
     if (pay.status === 404) { console.log(`mp-webhook: payment ${dataId} does not exist (test notification?)`); return send(200, { ok: true, ignored: "payment not found" }); }
     if (!pay.ok || !pay.json) { console.log(`mp-webhook: payment ${dataId} lookup ${pay.status}`); return send(500, { ok: false, error: "payment lookup failed" }); }
     const payment = pay.json;
-    if (payment.status !== "approved") return send(200, { ok: true, ignored: `status ${payment.status}` });
+    if (payment.status !== "approved") {
+      if (payment.status === "refunded" || payment.status === "charged_back") console.log(`mp-webhook: ALERT payment ${payment.id} (order ${payment.external_reference}) is ${payment.status}: if a guia was already made, cancel it with MG`); // MG has no cancel API
+      return send(200, { ok: true, ignored: `status ${payment.status}` });
+    }
+    // approved is not enough: a test-mode payment, an authorisation never captured or a partly refunded one is not money in the account
+    if (payment.live_mode === false || payment.captured === false || Number(payment.transaction_amount_refunded) > 0) {
+      console.log(`mp-webhook: payment ${payment.id} approved but not settled (live_mode ${payment.live_mode}, captured ${payment.captured}, refunded ${payment.transaction_amount_refunded}): nothing done`);
+      return send(200, { ok: true, ignored: "payment not settled" });
+    }
     const m = await orderMeta(payment, mpToken);
     if (!m.ref || m.ref !== payment.external_reference) { console.log(`mp-webhook: payment ${payment.id} is not one of ours (ref ${payment.external_reference})`); return send(200, { ok: true, ignored: "not a Puro Hilo order" }); }
     if (payment.currency_id !== "ARS" || Math.abs(Number(payment.transaction_amount) - Number(m.total)) > 0.01) {
@@ -134,7 +142,7 @@ async function handler(req, res) {
       first_name: m.first_name, last_name: m.last_name, email: m.email, phone: m.phone,
       address1: m.address1, address2: m.address2, city: m.city, state: m.state, postal_code: m.postal_code,
       order_id: m.ref, order_total: String(m.total), items: items.map((i) => ({ code: i.code, quantity: i.qty })),
-    }, { token: mgToken, dry: process.env.MG_DRY_RUN === "1" });
+    }, { token: mgToken, dry: process.env.MG_DRY_RUN === "1", payment: { id: payment.id, amount: payment.transaction_amount } }); // the payment fetched and checked above is the proof createGuia demands
     if (guia.obj.unprocessable) console.log(`mp-webhook: order ${m.ref} paid but MG cannot ship it: ${guia.obj.error}`); // address problem: retrying will not help, someone has to call the buyer
     else if (guia.code >= 400) return send(500, { ok: false, error: "MG guia failed", mg: guia.obj.error });
     return send(200, { ok: true, order: m.ref, payment: payment.id, contact: contactId, guia: guia.obj.skipped || guia.obj.dry_run ? guia.obj : { ok: guia.obj.ok, remito: guia.obj.remito, guia: guia.obj.mg && guia.obj.mg.guia } });
