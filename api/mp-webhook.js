@@ -2,17 +2,20 @@
 // (the notification itself is never trusted), its amount must equal the one /api/mp-checkout charged, then
 //   1. the buyer becomes a GHL contact (tag pago-mercadopago) with a note listing products, totals and the payment id,
 //      (a pickup order, metadata delivery "pickup": tag "retiro", no address, no guia: the note tells the shop to arrange the retiro),
-//   2. the MG Logistica guia is created through the same code as /api/mg-guia (createGuia, remito = order ref).
+//   2. the MG Logistica guia is created through the same code as /api/mg-guia (createGuia, remito = order ref),
+//   3. the same order also goes to Lightdata (createEnvio, id_venta = order ref). Both couriers are always tried, one failing never skips the other;
+//      a transient failure in either answers 500 so Mercado Pago retries, and each step skips what already exists.
 // Mercado Pago sends several notifications per payment (created, updated, retries), sometimes at the same moment, so the order note
 // doubles as a claim: the first note for a payment id wins (see claim()), later notifications skip. A failed run leaves its note
 // behind and is retried by Mercado Pago once the note is older than CLAIM_STALE_MS. Steps are safe to repeat (contact upsert,
 // remito lookup), so a transient failure answers 500 and Mercado Pago retries; an unfixable one (address MG cannot serve, payment
 // that does not exist) answers 200 and is logged.
 // Env: MP_ACCESS_TOKEN, MP_WEBHOOK_SECRET (signature), GHL_PIT, SHIPPING_API_TOKEN (MG), MG_DRY_RUN=1 (guia as dry run),
-//      CLAIM_WAIT_MS (default 1500), MG_SUCURSAL / PIECE_KG ... (see mg-guia.js).
+//      LIGHTDATA_TOKEN_EMPRESA / LIGHTDATA_TOKEN_CLIENTE / LIGHTDATA_ID_EMPRESA (see lightdata-envio.js), CLAIM_WAIT_MS (default 1500), MG_SUCURSAL / PIECE_KG ... (see mg-guia.js).
 
 const crypto = require("crypto");
 const { createGuia } = require("./mg-guia.js");
+const { createEnvio } = require("./lightdata-envio.js");
 const { GHL, LOCATION } = require("./_shop.js");
 
 const MP = "https://api.mercadopago.com";
@@ -138,14 +141,24 @@ async function handler(req, res) {
 
     // 2. MG guia (a pickup has nothing to ship: the note and the "retiro" tag are the notice)
     if (pickup) { console.log(`mp-webhook: order ${m.ref} is a pickup, no MG guia`); return send(200, { ok: true, order: m.ref, payment: payment.id, contact: contactId, pickup: true }); }
-    const guia = await createGuia({
+    const flat = {
       first_name: m.first_name, last_name: m.last_name, email: m.email, phone: m.phone,
       address1: m.address1, address2: m.address2, city: m.city, state: m.state, postal_code: m.postal_code,
       order_id: m.ref, order_total: String(m.total), items: items.map((i) => ({ code: i.code, quantity: i.qty })),
-    }, { token: mgToken, dry: process.env.MG_DRY_RUN === "1", payment: { id: payment.id, amount: payment.transaction_amount } }); // the payment fetched and checked above is the proof createGuia demands
-    if (guia.obj.unprocessable) console.log(`mp-webhook: order ${m.ref} paid but MG cannot ship it: ${guia.obj.error}`); // address problem: retrying will not help, someone has to call the buyer
-    else if (guia.code >= 400) return send(500, { ok: false, error: "MG guia failed", mg: guia.obj.error });
-    return send(200, { ok: true, order: m.ref, payment: payment.id, contact: contactId, guia: guia.obj.skipped || guia.obj.dry_run ? guia.obj : { ok: guia.obj.ok, remito: guia.obj.remito, guia: guia.obj.mg && guia.obj.mg.guia } });
+    };
+    const proof = { id: payment.id, amount: payment.transaction_amount }; // the payment fetched and checked above is the proof both couriers demand
+    const dry = process.env.MG_DRY_RUN === "1";
+    const guia = await createGuia(flat, { token: mgToken, dry, payment: proof });
+    const envio = await createEnvio(flat, { dry, payment: proof });
+    let failed = null;
+    for (const [name, r] of [["MG", guia], ["Lightdata", envio]]) {
+      if (r.obj.unprocessable) console.log(`mp-webhook: order ${m.ref} paid but ${name} cannot ship it: ${r.obj.error}`); // address problem: retrying will not help, someone has to call the buyer
+      else if (r.code >= 400) failed = failed || { name, error: r.obj.error };
+    }
+    if (failed) return send(500, { ok: false, error: `${failed.name} shipment failed`, detail: failed.error });
+    return send(200, { ok: true, order: m.ref, payment: payment.id, contact: contactId,
+      guia: guia.obj.skipped || guia.obj.dry_run ? guia.obj : { ok: guia.obj.ok, remito: guia.obj.remito, guia: guia.obj.mg && guia.obj.mg.guia },
+      lightdata: envio.obj });
   } catch (e) {
     console.log(`mp-webhook: error ${e.message}`);
     return send(500, { ok: false, error: String(e.message).slice(0, 200) });
