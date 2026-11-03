@@ -11,11 +11,11 @@
 // remito lookup), so a transient failure answers 500 and Mercado Pago retries; an unfixable one (address MG cannot serve, payment
 // that does not exist) answers 200 and is logged.
 // Env: MP_ACCESS_TOKEN, MP_WEBHOOK_SECRET (signature), GHL_PIT, SHIPPING_API_TOKEN (MG), MG_DRY_RUN=1 (guia as dry run),
-//      LIGHTDATA_TOKEN_EMPRESA / LIGHTDATA_TOKEN_CLIENTE / LIGHTDATA_ID_EMPRESA (see lightdata-envio.js), CLAIM_WAIT_MS (default 1500), MG_SUCURSAL / PIECE_KG ... (see mg-guia.js).
+//      LIGHTDATA_TOKEN_EMPRESA / LIGHTDATA_TOKEN_CLIENTE / LIGHTDATA_ID_EMPRESA (see _lightdata-envio.js), CLAIM_WAIT_MS (default 1500), MG_SUCURSAL / PIECE_KG ... (see mg-guia.js).
 
 const crypto = require("crypto");
 const { createGuia } = require("./mg-guia.js");
-const { createEnvio } = require("./lightdata-envio.js");
+const { createEnvio } = require("./_lightdata-envio.js");
 const { GHL, LOCATION } = require("./_shop.js");
 
 const MP = "https://api.mercadopago.com";
